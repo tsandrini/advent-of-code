@@ -81,7 +81,7 @@ in
           hostPlatform = system;
           overlays = let
             pkgsOverlay = _final: _prev: {
-              practicalFlakes = inputs.self.packages.${system};
+              aoc2023 = inputs.self.packages.${system};
             };
           in
             [pkgsOverlay]

@@ -10,12 +10,12 @@
 
   bootstrap = import ./_bootstrap-lib.nix {inherit lib;};
 
-  practicalFlakes = lib.makeExtensible (self:
+  aoc2023 = lib.makeExtensible (self:
     with self;
       mapModules' ./. (file:
         import file {
           inherit pkgs lib self inputs projectPath;
         }));
 in
-  practicalFlakes.extend
+  aoc2023.extend
   (_self: super: lib.foldr (a: b: a // b) {} (lib.attrValues super))

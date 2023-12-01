@@ -1,5 +1,5 @@
 {
-  description = "practicalFlakes - TODO Add a description of your new project";
+  description = "aoc2023 - TODO Add a description of your new project";
 
   inputs = {
     # Base dependencies
@@ -31,7 +31,7 @@
 
   outputs = inputs @ {flake-parts, ...}: let
     inherit (inputs) nixpkgs;
-    inherit (lib.practicalFlakes) mapModules mkNixpkgs flatten;
+    inherit (lib.aoc2023) mapModules mkNixpkgs flatten;
 
     # You should ideally use relative paths in each individual part from ./parts,
     # however, if needed you can use the `projectPath` variable that is passed
@@ -43,7 +43,7 @@
     # to override. This instance is then passed to every part in ./parts so that
     # you can use it in your custom modules
     lib = nixpkgs.lib.extend (self: _super: {
-      practicalFlakes = import ./nix/lib {
+      aoc2023 = import ./nix/lib {
         inherit inputs projectPath;
         pkgs = nixpkgs;
         lib = self;
@@ -79,7 +79,7 @@
       #
       # `systems = (import inputs.systems) ++ [ "armv7l-linux" ];`
       systems = import inputs.systems;
-      flake.lib = lib.practicalFlakes;
+      flake.lib = lib.aoc2023;
 
       # Finally, we bootstrap the `pkgs` argument to use our custom nixpkgs
       # instance bootstrapped with overlays, loaded system and other defaults.
