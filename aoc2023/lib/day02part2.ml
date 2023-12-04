@@ -1,9 +1,3 @@
-#!/usr/bin/env nix-shell
-(*
-#!nix-shell --pure -i ocaml -p ocaml
-*)
-#load "str.cma"
-open Str
 module StringMap = Map.Make(String)
 
 let split_str separator str = Str.split (Str.regexp_string separator) str
@@ -45,27 +39,14 @@ let power_of_game game_spec =
   * strmap_opt_to_int "blue" max_values
   * strmap_opt_to_int "green" max_values
 
-let parse_input filename =
-  let ic = open_in filename in
-  let values = ref [] in
-  try
-    while true do
-      let line = input_line ic in
+let solve lines =
+  lines |> List.map (fun line ->
       let _, game_spec =
         split_str ":" line |> fun x ->
         (List.hd x, List.tl x |> List.hd |> String.trim)
       in
-      values := power_of_game game_spec :: !values
-    done;
-    []
-  with
-  | End_of_file ->
-      close_in ic;
-      !values
-  | e ->
-      close_in_noerr ic;
-      raise e
-;;
+      power_of_game game_spec
+) |> List.fold_left ( + ) 0
 
-parse_input Sys.argv.(1) |> List.fold_left ( + ) 0 |> print_int;
-print_endline
+
+let main input = Core.In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

@@ -38,4 +38,4 @@ let parse_document filename =
   |> List.fold_left ( + ) 0
 
 
-let solve input = parse_document input |> Printf.printf "Solution: %d\n"
+let main input = parse_document input |> Printf.printf "Solution: %d\n"

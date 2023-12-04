@@ -1,6 +1,8 @@
 let aoc identifier input =
   match identifier with
-  | "1" -> Aoc2023.Day01.solve input
+  | "01" -> Aoc2023.Day01.main input
+  | "02part1" -> Aoc2023.Day02part1.main input
+  | "02part2" -> Aoc2023.Day02part2.main input
   | "03part1" -> Aoc2023.Day03part1.main input
   | "03part2" -> Aoc2023.Day03part2.main input
   | "04part1" -> Aoc2023.Day04part1.main input
