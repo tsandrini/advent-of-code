@@ -24,18 +24,25 @@
     cz-cli
 
     # ocaml
-    ocamlPackages.merlin
-    ocamlPackages.merlin-lib
-    ocamlPackages.utop
-    ocamlPackages.ocp-indent
-    ocamlPackages.ocamlformat_0_26_0
+    ocaml
+    # dune_3
     opam
-    dune_3
+    nodePackages.pyright
+    python311Packages.ipython
   ];
+
+  # env = {
+  #   OCAMLPATH = "${config.env.DEVENV_ROOT}/_opam/lib/";
+  #   OPAM_SWITCH_PREFIX = "${config.env.DEVENV_ROOT}/_opam";
+  #   OCAML_LD_LIBRARY_PATH = "${config.env.DEVENV_ROOT}/_opam/lib/stublibs:${pkgs.ocamlPackages.ocaml.version}/lib/ocaml/stublibs:${pkgs.ocamlPackages.ocaml.version}/lib/ocaml";
+  #   OCAML_TOPLEVEL_PATH = "${config.env.DEVENV_ROOT}/_opam/lib/toplevel";
+  #   MANPATH = "${config.env.DEVENV_ROOT}/_opam/man";
+  #   PATH = "${config.env.DEVENV_ROOT}/_opam/bin:$PATH";
+  # };
 
   languages.nix.enable = true;
   languages.python.enable = true;
-  languages.ocaml.enable = true;
+  # languages.ocaml.enable = true;
   difftastic.enable = true;
   devcontainer.enable = true; # if anyone needs it
   devenv.flakesIntegration = true;
@@ -61,6 +68,7 @@
   };
 
   enterShell = ''
+    eval $(opam env)
     echo ""
     echo "~~ Welcome to the aoc2023 devshell! ~~
 

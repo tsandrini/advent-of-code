@@ -1,0 +1,6 @@
+(library
+ (public_name aoc2023)
+ (name aoc2023)
+ (inline_tests)
+ (libraries str core)
+ (preprocess (pps ppx_inline_test)))

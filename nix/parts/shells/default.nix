@@ -13,6 +13,7 @@
     devenv.shells.dev = import ./dev.nix {
       inherit pkgs projectPath;
       treefmt = config.treefmt.build.wrapper;
+      config = config.devenv.shells.dev;
     };
   };
 }

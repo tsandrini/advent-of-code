@@ -1,0 +1,26 @@
+(lang dune 3.11)
+
+(name aoc2023)
+
+(generate_opam_files true)
+
+(source
+ (github username/reponame))
+
+(authors "Tomáš Sandrini")
+
+(maintainers "Tomáš Sandrini")
+
+(license MIT)
+
+(documentation https://github.com/tsandrini/aoc2023/)
+
+(package
+ (name aoc2023)
+ (synopsis "My solution for year 2023 of Advent of Code (AOC) ")
+ (description "My solution for year 2023 of Advent of Code (AOC) ")
+ (depends ocaml dune)
+ (tags
+  (topics "to describe" your project)))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

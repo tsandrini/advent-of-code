@@ -1,10 +1,3 @@
-#!/usr/bin/env nix-shell
-(*
-#!nix-shell --pure -i ocaml -p ocaml
-*)
-#load "str.cma";;
-open Str
-
 let digit_mappings =
   [
     ("one", "1");
@@ -40,14 +33,9 @@ let parse_calibration_value line =
   String.make 1 a ^ String.make 1 b |> int_of_string
 
 let parse_document filename =
-  let lines =
-    Seq.unfold
-      (fun ic ->
-        match input_line ic with
-        | line -> Some (line, ic)
-        | exception End_of_file -> None)
-      (open_in filename)
-  in
-  Seq.map parse_calibration_value lines |> Seq.fold_left ( + ) 0
+  Core.In_channel.read_lines filename
+  |> List.map parse_calibration_value
+  |> List.fold_left ( + ) 0
 
-let () = parse_document Sys.argv.(1) |> print_int
+
+let solve input = parse_document input |> Printf.printf "Solution: %d\n"
