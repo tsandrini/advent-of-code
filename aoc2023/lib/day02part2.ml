@@ -1,6 +1,7 @@
-module StringMap = Map.Make(String)
-
-let split_str separator str = Str.split (Str.regexp_string separator) str
+module List' = List
+module String' = String
+module StringMap = Map.Make (String)
+open Core
 
 let sum_by_identifier lst =
   let update_map acc (value, key) =
@@ -9,7 +10,7 @@ let sum_by_identifier lst =
     in
     StringMap.add key (current_sum + value) acc
   in
-  List.fold_left update_map StringMap.empty lst |> StringMap.bindings
+  List.fold_left ~f:update_map ~init:StringMap.empty lst |> StringMap.bindings
 
 let opt_to_int = function Some x -> x | None -> 0
 
@@ -21,32 +22,36 @@ let find_max_values lst =
     in
     StringMap.add color (max current_max value) acc
   in
-  List.fold_left update_max StringMap.empty lst
+  List.fold_left ~f:update_max ~init:StringMap.empty lst
 
 (*PART2*)
 let power_of_game game_spec =
   let strmap_opt_to_int key map = opt_to_int (StringMap.find_opt key map) in
   let max_values =
-    split_str ";" game_spec |> List.map String.trim
-    |> List.map (split_str ",")
+    String.split ~on:';' game_spec
+    |> List.map ~f:String.strip
+    |> List.map ~f:(String.split ~on:',')
     |> List.map
-         (List.map (fun x ->
-              split_str " " x |> fun y ->
-              (List.hd y |> int_of_string, List.tl y |> List.hd)))
-    |> List.map sum_by_identifier |> List.flatten |> find_max_values
+         ~f:
+           (List.map ~f:(fun x ->
+                String.strip x |> String.split ~on:' ' |> Utils.list_to_tuple
+                |> fun (id, color) -> (Int.of_string id, color)))
+    |> List.map ~f:sum_by_identifier
+    |> List'.flatten |> find_max_values
   in
   strmap_opt_to_int "red" max_values
   * strmap_opt_to_int "blue" max_values
   * strmap_opt_to_int "green" max_values
 
 let solve lines =
-  lines |> List.map (fun line ->
-      let _, game_spec =
-        split_str ":" line |> fun x ->
-        (List.hd x, List.tl x |> List.hd |> String.trim)
-      in
-      power_of_game game_spec
-) |> List.fold_left ( + ) 0
+  lines
+  |> List.map ~f:(fun line ->
+         let game_spec =
+           String.split ~on:':' line |> List.map ~f:String.strip |> List'.tl
+           |> List'.hd |> String.strip
+         in
+         power_of_game game_spec)
+  |> List.fold_left ~f:( + ) ~init:0
 
-
-let main input = Core.In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"
+let main input =
+  In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

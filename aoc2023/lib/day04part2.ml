@@ -1,9 +1,6 @@
 module List' = List
 open Core
 
-let replace_multiple_whitespaces str =
-  Str.global_replace (Str.regexp "[ \t\n\r]+") " " str
-
 
 let process_spec spec num_games =
   let counter = Array.init num_games ~f:(fun _ -> 1) in
@@ -19,11 +16,11 @@ let parse_spec lines =
   for i = 0 to (num_games - 1) do
     let line = List'.nth lines i in
     let spec = line |> String.split ~on:':' |> List'.tl |> List'.hd |> String.strip
-      |> replace_multiple_whitespaces |> String.split ~on:'|'
+      |> Utils.reduce_multiple_whitespaces |> String.split ~on:'|'
       |> List.map ~f:String.strip
       |> List.map ~f:(String.split ~on:' ')
       |> List.map ~f:(List.map ~f:Int.of_string)
-      |> (fun x -> match x with [ a; b ] -> (a, b) | _ -> ([], []))
+      |> Utils.list_to_tuple
       |> (fun (x, y) -> List.filter ~f:(fun el -> List.mem x el ~equal:( = )) y)
       |> List.length |> List.range 0 |> List.map ~f:(fun x -> x + i + 1)
       |> List.filter ~f:(fun x -> x <= num_games)

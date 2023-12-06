@@ -1,13 +1,15 @@
-module StringMap = Map.Make(String)
+module List' = List
+module String' = String
+module StringMap = Map.Make (String)
+open Core
 
 let parse_game_id s =
   let prefix = "Game " in
   let number_str =
-    String.sub s (String.length prefix) (String.length s - String.length prefix)
+    String'.sub s (String'.length prefix)
+      (String'.length s - String'.length prefix)
   in
-  int_of_string number_str
-
-let split_str separator str = Str.split (Str.regexp_string separator) str
+  Int.of_string number_str
 
 let sum_by_identifier lst =
   let update_map acc (value, key) =
@@ -16,7 +18,7 @@ let sum_by_identifier lst =
     in
     StringMap.add key (current_sum + value) acc
   in
-  List.fold_left update_map StringMap.empty lst |> StringMap.bindings
+  List.fold_left ~f:update_map ~init:StringMap.empty lst |> StringMap.bindings
 
 let check_max_cubes = function
   | "red", n -> n <= 12
@@ -25,26 +27,28 @@ let check_max_cubes = function
   | _ -> false
 
 let is_game_valid game_spec =
-  split_str ";" game_spec |> List.map String.trim
-  |> List.map (split_str ",")
+  String.split ~on:';' game_spec
+  |> List.map ~f:String.strip
+  |> List.map ~f:(String.split ~on:',')
   |> List.map
-       (List.map (fun x ->
-            split_str " " x |> fun y ->
-            (List.hd y |> int_of_string, List.tl y |> List.hd)))
-  |> List.map sum_by_identifier
-  |> List.map (List.map check_max_cubes)
-  |> List.map (List.fold_left ( && ) true)
-  |> List.fold_left ( && ) true
+       ~f:
+         (List.map ~f:(fun x ->
+              String.strip x |> String.split ~on:' ' |> Utils.list_to_tuple
+              |> fun (id, color) -> (Int.of_string id, color)))
+  |> List.map ~f:sum_by_identifier
+  |> List.map ~f:(List.map ~f:check_max_cubes)
+  |> List.map ~f:(List.fold_left ~f:( && ) ~init:true)
+  |> List.fold_left ~f:( && ) ~init:true
 
 let solve lines =
-  lines |> List.map (fun line ->
+  List.map lines ~f:(fun line ->
       let game_id_str, game_spec =
-        split_str ":" line |> fun x ->
-        (List.hd x, List.tl x |> List.hd |> String.trim)
+        String.split ~on:':' line |> List.map ~f:String.strip
+        |> Utils.list_to_tuple
       in
       let game_id = parse_game_id game_id_str in
-      if is_game_valid game_spec then game_id else 0
-    ) |> List.fold_left ( + ) 0
+      if is_game_valid game_spec then game_id else 0)
+  |> List.fold_left ~f:( + ) ~init:0
 
-
-let main input = Core.In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"
+let main input =
+  In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

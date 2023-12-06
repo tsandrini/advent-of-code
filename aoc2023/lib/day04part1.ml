@@ -1,17 +1,15 @@
 module List' = List
 open Core
 
-let replace_multiple_whitespaces str =
-  Str.global_replace (Str.regexp "[ \t\n\r]+") " " str
 
 let solve lines =
   List.map lines ~f:(fun line ->
       line |> String.split ~on:':' |> List'.tl |> List'.hd |> String.strip
-      |> replace_multiple_whitespaces |> String.split ~on:'|'
+      |> Utils.reduce_multiple_whitespaces |> String.split ~on:'|'
       |> List.map ~f:String.strip
       |> List.map ~f:(String.split ~on:' ')
       |> List.map ~f:(List.map ~f:Int.of_string)
-      |> (fun x -> match x with [ a; b ] -> (a, b) | _ -> ([], []))
+      |> Utils.list_to_tuple
       |> (fun (x, y) -> List.filter ~f:(fun el -> List.mem x el ~equal:( = )) y)
       |> List.length |> fun num -> (if num < 2 then num else Int.pow 2 (num - 1)))
   |> List.fold_left ~f:( + ) ~init:0

@@ -2,5 +2,5 @@
  (public_name aoc2023)
  (name aoc2023)
  (inline_tests)
- (libraries str core)
- (preprocess (pps ppx_inline_test)))
+ (libraries str core ppx_deriving)
+ (preprocess (pps ppx_inline_test ppx_compare ppx_hash ppx_deriving.std ppx_sexp_conv)))

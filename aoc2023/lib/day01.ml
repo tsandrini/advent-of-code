@@ -1,3 +1,7 @@
+module List' = List
+module String' = String
+open Core
+
 let digit_mappings =
   [
     ("one", "1");
@@ -19,23 +23,18 @@ let double_stfoe str =
     | ('s' | 't' | 'f' | 'o' | 'e') as c -> String.make 2 c
     | _ as c -> String.make 1 c
   in
-  String.concat ""
-    (List.map double_if_needed (String.to_seq str |> List.of_seq))
-
-let is_digit c = c >= '0' && c <= '9'
+  String.concat ~sep:"" (List.map ~f:double_if_needed (String.to_list str))
 
 let parse_calibration_value line =
-  double_stfoe line |> fun x ->
-  List.fold_left replace_word x digit_mappings
-  |> String.to_seq |> List.of_seq |> List.filter is_digit
-  |> fun x ->
-  (List.hd x, List.rev x |> List.hd) |> fun (a, b) ->
-  String.make 1 a ^ String.make 1 b |> int_of_string
+  double_stfoe line
+  |> (fun x -> List.fold_left ~f:replace_word ~init:x digit_mappings)
+  |> String.to_list |> List.filter ~f:Char.is_digit
+  |> (fun x -> (List'.hd x, List.rev x |> List'.hd))
+  |> (fun (a, b) -> String.make 1 a ^ String.make 1 b)
+  |> int_of_string
 
-let parse_document filename =
-  Core.In_channel.read_lines filename
-  |> List.map parse_calibration_value
-  |> List.fold_left ( + ) 0
+let solve lines =
+  List.map ~f:parse_calibration_value lines |> List.fold_left ~f:( + ) ~init:0
 
-
-let main input = parse_document input |> Printf.printf "Solution: %d\n"
+let main input =
+  In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"
