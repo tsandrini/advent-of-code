@@ -39,3 +39,26 @@ let list_to_tuple = function
 
 let reduce_multiple_whitespaces str =
   Str.global_replace (Str.regexp "[ \t\n\r]+") " " str
+
+let elem_indices_of_list ~elem ~compare lst =
+  let rec aux acc index = function
+    | [] -> List.rev acc
+    | hd :: tl ->
+      if (compare hd elem) = 0 then aux (index :: acc) (index + 1) tl else aux acc (index + 1) tl
+  in
+  aux [] 0 lst
+
+let rec rec_product_of_list l =
+    let rec aux ~acc l1 l2 = match l1, l2 with
+    | [], _ | _, [] -> acc
+    | h1::t1, h2::t2 ->
+        let acc = (h1::h2)::acc in
+        let acc = (aux ~acc t1 l2) in
+        aux ~acc [h1] t2
+    (* now we can do the actual computation *)
+    in match l with
+    | [] -> []
+    | [l1] -> List.map ~f:(fun x -> [x]) l1
+    | l1::tl ->
+        let tail_product = rec_product_of_list tl in
+        aux ~acc:[] l1 tail_product
