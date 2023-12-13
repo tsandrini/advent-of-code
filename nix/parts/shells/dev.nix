@@ -25,6 +25,11 @@
 
     # ocaml
     ocaml
+    lapack
+    lapack-reference
+    openblas
+    plplot
+    blas
     # dune_3
     opam
     nodePackages.pyright
