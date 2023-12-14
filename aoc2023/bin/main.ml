@@ -20,6 +20,7 @@ let aoc identifier input =
   | "10" -> Aoc2023.Day10.main input
   | "11" -> Aoc2023.Day11.main input
   | "12" -> Aoc2023.Day12.main input
+  | "13" -> Aoc2023.Day13.main input
   | _ -> print_endline "Not implemented yet"
 
 
