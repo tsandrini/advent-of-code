@@ -83,3 +83,30 @@ let rec gcd a b =
 
 let lcm a b =
   a * b / (gcd a b)
+
+let memo_rec f =
+  let h = Hashtbl.Poly.create () ~size:16 in
+  let rec g x =
+    match Hashtbl.find h x with
+    | Some y -> y
+    | None ->
+      let y = f g x in
+      Hashtbl.set h ~key:x ~data:y;
+      y
+  in
+  g
+
+let memo f =
+  let h = Hashtbl.Poly.create () ~size:11 in
+  fun x ->
+    match Hashtbl.find h x with
+    | Some y -> y
+    | None ->
+      let y = f x in
+      Hashtbl.set h ~key:x ~data:y;
+      y
+
+let sum = List.fold ~init:0 ~f:( + )
+let product = List.fold ~init:1 ~f:( * )
+let list_all_true = List.fold ~init:true ~f:( && )
+let list_any_true = List.fold ~init:false ~f:( || )
