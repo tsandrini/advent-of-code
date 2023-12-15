@@ -1,12 +1,5 @@
 open Core
 
-let transpose mat =
-  let height = List.length mat in
-  let width = List.length (List.hd_exn mat) in
-  Array.init width ~f:(fun y ->
-      Array.init height ~f:(fun x -> List.nth_exn (List.nth_exn mat x) y))
-  |> Array.map ~f:Array.to_list |> Array.to_list
-
 let is_horizontal_reflection ?(smudge = false) mat line =
   let len = List.length mat in
 
@@ -40,7 +33,7 @@ let parse input =
 let solve matrices =
   let solver ~smudge =
     List.fold matrices ~init:0 ~f:(fun acc mat ->
-        let mat_t = transpose mat in
+        let mat_t = Utils.transpose mat in
         let horizontal_width =
           List.init (List.length mat - 1) ~f:(fun i -> i)
           |> List.filter ~f:(is_horizontal_reflection ~smudge mat)

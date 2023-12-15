@@ -77,6 +77,13 @@ let list_repeat_until ~f lst =
   in
   aux lst
 
+let list_repeati_until ~f lst =
+  let rec aux idx = function
+    | [] -> aux idx lst
+    | hd :: tl -> if Bool.(f idx hd <> true) then aux (idx + 1) tl
+  in
+  aux 0 lst
+
 let rec gcd a b =
   if b = 0 then a
   else gcd b (a mod b)
@@ -110,3 +117,15 @@ let sum = List.fold ~init:0 ~f:( + )
 let product = List.fold ~init:1 ~f:( * )
 let list_all_true = List.fold ~init:true ~f:( && )
 let list_any_true = List.fold ~init:false ~f:( || )
+
+let rec transpose = function
+  | [] | [] :: _ -> []
+  | matrix -> List.map ~f:List.hd_exn matrix :: transpose (List.map ~f:List.tl_exn matrix)
+
+let rotate_ccw_90 grid = transpose (List.map ~f:List.rev grid)
+let rotate_cw_90 grid = List.map ~f:List.rev (transpose grid)
+let rotate_180 grid = List.rev (List.map ~f:List.rev grid)
+
+let rec apply_n_times f n x =
+  if n <= 0 then x
+  else apply_n_times f (n - 1) (f x)
