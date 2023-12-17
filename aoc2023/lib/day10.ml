@@ -27,25 +27,6 @@ module IntPair = struct
   type t = int * int [@@deriving sexp, compare, hash]
 end
 
-let parse input =
-  let tbl = Hashtbl.create (module IntPair) in
-  let lines = String.split_lines input in
-  let height = List.length lines in
-  let width = String.length (List.hd_exn lines) in
-  let y = ref 0 in
-  let x = ref 0 in
-  let start_pos = ref (0, 0) in
-  List.iter lines ~f:(fun line ->
-      String.iter line ~f:(fun c ->
-          let node_type = grid_node_type_of_char c in
-          Hashtbl.set tbl ~key:(!x, !y) ~data:node_type;
-          if compare_grid_node_type node_type Start = 0 then
-            start_pos := (!x, !y);
-          x := !x + 1);
-      y := !y + 1;
-      x := 0);
-  (tbl, !start_pos, (width, height))
-
 let next_node_for ~prev_node:(x', y') ~curr_node:(x, y) ~dim:(width, height) =
   let xdiff = x - x' in
   let ydiff = y - y' in
@@ -146,12 +127,70 @@ let shoelace_area coords =
   let closed_coords = coords @ [ List.hd_exn coords ] in
   abs (aux 0 closed_coords / 2)
 
-let solve (tbl, start_pos, (width, height)) =
+let parse input =
+  let tbl = Hashtbl.create (module IntPair) in
+  let lines = String.split_lines input in
+  let height = List.length lines in
+  let width = String.length (List.hd_exn lines) in
+  let y = ref 0 in
+  let x = ref 0 in
+  let start_pos = ref (0, 0) in
+  List.iter lines ~f:(fun line ->
+      String.iter line ~f:(fun c ->
+          let node_type = grid_node_type_of_char c in
+          Hashtbl.set tbl ~key:(!x, !y) ~data:node_type;
+          if compare_grid_node_type node_type Start = 0 then
+            start_pos := (!x, !y);
+          x := !x + 1);
+      y := !y + 1;
+      x := 0);
+  (tbl, !start_pos, (width, height))
+
+let part1 (tbl, start_pos, (width, height)) =
+  let longest_cycle = find_cycle tbl ~start_pos ~dim:(width, height) in
+  List.length longest_cycle / 2
+
+let part2 (tbl, start_pos, (width, height)) =
   let longest_cycle = find_cycle tbl ~start_pos ~dim:(width, height) in
   let cycle_integral = shoelace_area longest_cycle in
   let cycle_len = List.length longest_cycle / 2 in
-  Printf.printf "Part1: Len(longest_cycle)/2 = %d\n" cycle_len;
-  Printf.printf "Part2: Integral of longest cycle = %d\n"
-    (cycle_integral - cycle_len + 1)
+  cycle_integral - cycle_len + 1
 
-let main input = In_channel.read_all input |> parse |> solve
+let solve processed_inp =
+  Printf.printf "Part 1: %d\n" (part1 processed_inp);
+  Printf.printf "Part 2: %d\n" (part2 processed_inp)
+
+let main = In_channel.read_all >> parse >> solve
+
+let%test "Day10 part1 - example data 1" =
+  (parse >> part1) ".....\n.S-7.\n.|.|.\n.L-J.\n....." = 4
+
+let%test "Day10 part1 - example data 1" =
+  (parse >> part1) "..F7.\n.FJ|.\nSJ.L7\n|F--J\nLJ..." = 8
+
+let%test "Day10 part2 - example data 1" =
+  (parse >> part2)
+    "...........\n\
+     .S-------7.\n\
+     .|F-----7|.\n\
+     .||.....||.\n\
+     .||.....||.\n\
+     .|L-7.F-J|.\n\
+     .|..|.|..|.\n\
+     .L--J.L--J.\n\
+     ..........."
+  = 4
+
+let%test "Day10 part2 - example data 2" =
+  (parse >> part2)
+    ".F----7F7F7F7F-7....\n\
+     .|F--7||||||||FJ....\n\
+     .||.FJ||||||||L7....\n\
+     FJL7L7LJLJ||LJ.L-7..\n\
+     L--J.L7...LJS7F-7L7.\n\
+     ....F-J..F7FJ|L7L7L7\n\
+     ....L7.F7||L7|.L7L7|\n\
+     .....|FJLJ|FJ|F7|.LJ\n\
+     ....FJL-7.||.||||...\n\
+     ....L---J.LJ.LJLJ..."
+  = 8

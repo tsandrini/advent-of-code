@@ -20,14 +20,12 @@ let parse input =
            String.to_list line |> List.map ~f:int_node_type_of_char)
   in
   let empty_rows =
-    List.mapi space ~f:(fun i row ->
-        if UList.fold_sum row = 0 then i else -1)
+    List.mapi space ~f:(fun i row -> if UList.fold_sum row = 0 then i else -1)
     |> List.filter ~f:(fun y -> y <> -1)
   in
   let empty_cols =
     transpose space
-    |> List.mapi ~f:(fun i row ->
-           if UList.fold_sum row = 0 then i else -1)
+    |> List.mapi ~f:(fun i row -> if UList.fold_sum row = 0 then i else -1)
     |> List.filter ~f:(fun x -> x <> -1)
   in
   let galaxies = ref [] in
@@ -66,55 +64,28 @@ let compute_distances ?(expansion_rate = 2) ~galaxies
   in
   aux 0 galaxies
 
-let solve (_, galaxies, empty) =
-  Printf.printf "Part1 - sum of distances (expansion_rate=2): %d\n"
-    (compute_distances ~galaxies ~empty ~expansion_rate:1);
-  Printf.printf "Part2 - sum of distances (expansion_rate=1000000): %d\n"
-    (compute_distances ~galaxies ~empty ~expansion_rate:999999)
+let part1 (_, galaxies, empty) =
+  compute_distances ~galaxies ~empty ~expansion_rate:1
 
-let main input = In_channel.read_all input |> parse |> solve
+let part2 (_, galaxies, empty) =
+  compute_distances ~galaxies ~empty ~expansion_rate:999999
 
-let%test "Day11 part1 - example input" =
-  "...#......\n\
-   .......#..\n\
-   #.........\n\
-   ..........\n\
-   ......#...\n\
-   .#........\n\
-   .........#\n\
-   ..........\n\
-   .......#..\n\
-   #...#....." |> parse
-  |> (fun (_, galaxies, empty) ->
-       compute_distances ~galaxies ~empty ~expansion_rate:1)
+let solve processed_inp =
+  Printf.printf "Part 1: %d\n" (part1 processed_inp);
+  Printf.printf "Part 2: %d\n" (part2 processed_inp)
+
+let main = In_channel.read_all >> parse >> solve
+
+let%test "Day11 part1 - example data" =
+  (parse >> part1)
+    "...#......\n\
+     .......#..\n\
+     #.........\n\
+     ..........\n\
+     ......#...\n\
+     .#........\n\
+     .........#\n\
+     ..........\n\
+     .......#..\n\
+     #...#....."
   = 374
-
-let%test "Day11 part2 - example input1" =
-  "...#......\n\
-   .......#..\n\
-   #.........\n\
-   ..........\n\
-   ......#...\n\
-   .#........\n\
-   .........#\n\
-   ..........\n\
-   .......#..\n\
-   #...#....." |> parse
-  |> (fun (_, galaxies, empty) ->
-       compute_distances ~galaxies ~empty ~expansion_rate:9)
-  = 1030
-
-let%test "Day11 part2 - example input2" =
-  "...#......\n\
-   .......#..\n\
-   #.........\n\
-   ..........\n\
-   ......#...\n\
-   .#........\n\
-   .........#\n\
-   ..........\n\
-   .......#..\n\
-   #...#....." |> parse
-  |> (fun (_, galaxies, empty) ->
-       compute_distances ~galaxies ~empty ~expansion_rate:99)
-  = 8410

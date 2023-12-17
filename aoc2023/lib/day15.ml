@@ -1,11 +1,8 @@
 open Core
 open Utils
 
-let hash str =
-  String.to_list str
-  |> List.fold_left ~init:0 ~f:(fun acc c -> 17 * (acc + Char.to_int c) mod 256)
-
-let parse input = String.strip input |> String.split ~on:','
+let hash =
+  String.to_list >> List.fold_left ~init:0 ~f:(fun acc c -> 17 * (acc + Char.to_int c) mod 256)
 
 let map_list_append_or_rewrite ~tbl ~key (str_id, focal_len) =
   let lst = Hashtbl.find_or_add tbl key ~default:(fun () -> []) in
@@ -47,10 +44,18 @@ let focusing_power_of_conf seqs =
         * List.foldi data ~init:0 ~f:(fun i acc' (_, focal_len) ->
               acc' + (focal_len * (i + 1))))
 
-let solve seqs =
-  let part1 = List.map seqs ~f:hash |> UList.fold_sum in
-  let part2 = focusing_power_of_conf seqs in
-  Printf.printf "Part 1: %d\n" part1;
-  Printf.printf "Part 2: %d\n" part2
+let parse = String.strip >> String.split ~on:','
+let part1 = List.map ~f:hash >> UList.fold_sum
+let part2 = focusing_power_of_conf
 
-let main input = In_channel.read_all input |> parse |> solve
+let solve processed_inp =
+  Printf.printf "Part 1: %d\n" (part1 processed_inp);
+  Printf.printf "Part 2: %d\n" (part2 processed_inp)
+
+let main = In_channel.read_all >> parse >> solve
+
+let%test "Day15 part1 - example data" =
+  (parse >> part1) "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7" = 1320
+
+let%test "Day15 part2 - example data" =
+  (parse >> part2) "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7" = 145

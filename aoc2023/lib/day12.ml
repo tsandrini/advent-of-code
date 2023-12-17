@@ -1,17 +1,6 @@
 open Core
 open Utils
 
-let parse input =
-  String.split_lines input
-  |> List.map ~f:(fun line ->
-         let spring_list, groups =
-           String.split ~on:' ' line |> UList.to_tuple_exn
-         in
-         let groups =
-           String.split ~on:',' groups |> List.map ~f:Int.of_string
-         in
-         (spring_list, groups))
-
 let count_perms_memo =
   let count_perms self (line, groups) =
     let len = String.length line in
@@ -35,22 +24,50 @@ let count_perms_memo =
   in
   UMemo.memo_rec count_perms
 
-let solve lines =
-  let total_perms = ref 0 in
-  List.iter lines ~f:(fun (spring_list, groups) ->
-      total_perms := !total_perms + count_perms_memo (spring_list, groups));
-  let part1 =
-    List.fold_left lines ~init:0 ~f:(fun acc (spring_list, groups) ->
-        acc + count_perms_memo (spring_list, groups))
-  in
-  let part2 =
-    List.fold_left lines ~init:0 ~f:(fun acc (spring_list, groups) ->
-        acc
-        + count_perms_memo
-            ( List.init 5 ~f:(fun _ -> spring_list) |> String.concat ~sep:"?",
-              List.init 5 ~f:(fun _ -> groups) |> List.concat ))
-  in
-  Printf.printf "Part1 with nfold=0: %d\n" part1;
-  Printf.printf "Part1 with nfold=5: %d\n" part2
+let parse =
+  String.split_lines
+  >> List.map ~f:(fun line ->
+         let spring_list, groups =
+           String.split ~on:' ' line |> UList.to_tuple_exn
+         in
+         let groups =
+           String.split ~on:',' groups |> List.map ~f:Int.of_string
+         in
+         (spring_list, groups))
 
-let main input = In_channel.read_all input |> parse |> solve
+let part1 =
+  List.fold_left ~init:0 ~f:(fun acc (spring_list, groups) ->
+      acc + count_perms_memo (spring_list, groups))
+
+let part2 =
+  List.fold_left ~init:0 ~f:(fun acc (spring_list, groups) ->
+      acc
+      + count_perms_memo
+          ( List.init 5 ~f:(fun _ -> spring_list) |> String.concat ~sep:"?",
+            List.init 5 ~f:(fun _ -> groups) |> List.concat ))
+
+let solve processed_inp =
+  Printf.printf "Part 1: %d\n" (part1 processed_inp);
+  Printf.printf "Part 2: %d\n" (part2 processed_inp)
+
+let main = In_channel.read_all >> parse >> solve
+
+let%test "Day12 part1 - example data" =
+  (parse >> part1)
+    "???.### 1,1,3\n\
+     .??..??...?##. 1,1,3\n\
+     ?#?#?#?#?#?#?#? 1,3,1,6\n\
+     ????.#...#... 4,1,1\n\
+     ????.######..#####. 1,6,5\n\
+     ?###???????? 3,2,1"
+  = 21
+
+let%test "Day12 part2 - example data" =
+  (parse >> part2)
+    "???.### 1,1,3\n\
+     .??..??...?##. 1,1,3\n\
+     ?#?#?#?#?#?#?#? 1,3,1,6\n\
+     ????.#...#... 4,1,1\n\
+     ????.######..#####. 1,6,5\n\
+     ?###???????? 3,2,1"
+  = 525152
