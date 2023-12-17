@@ -1,10 +1,11 @@
 open Core
+open Utils
 
 let parse input =
   String.split_lines input
   |> List.map ~f:(fun line ->
          let spring_list, groups =
-           String.split ~on:' ' line |> Utils.list_to_tuple
+           String.split ~on:' ' line |> UList.to_tuple_exn
          in
          let groups =
            String.split ~on:',' groups |> List.map ~f:Int.of_string
@@ -17,7 +18,7 @@ let count_perms_memo =
     let groups_len = List.length groups in
     if len = 0 then if groups_len = 0 then 1 else 0
     else if groups_len = 0 then if String.contains line '#' then 0 else 1
-    else if len < Utils.sum groups + groups_len - 1 then 0
+    else if len < UList.fold_sum groups + groups_len - 1 then 0
     else
       match line.[0] with
       | '.' -> self (String.drop_prefix line 1, groups)
@@ -32,7 +33,7 @@ let count_perms_memo =
           self ("#" ^ String.drop_prefix line 1, groups)
           + self ("." ^ String.drop_prefix line 1, groups)
   in
-  Utils.memo_rec count_perms
+  UMemo.memo_rec count_perms
 
 let solve lines =
   let total_perms = ref 0 in

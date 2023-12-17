@@ -1,9 +1,5 @@
-(* Utop line *)
-(* #use "topfind";; #require "core";; #require "ppx_jane";; #require "ppx_deriving";; #require "ppx_deriving.std";; #require "ppx_inline_test";; #require "ppx_hash";; #require "ppx_sexp_conv";; #require "ppx_compare";; *)
-
-module List' = List
-module String' = String
 open Core
+open Utils
 
 type category =
   | Seed
@@ -31,8 +27,8 @@ let category_seq_of_seeds =
   [ Seed; Soil; Fertilizer; Water; Light; Temperature; Humidity; Location ]
 
 let seed_category_path =
-  List'.map2
-    (fun a b -> (a, b))
+  List.map2_exn
+    ~f:(fun a b -> (a, b))
     (List.slice category_seq_of_seeds 0 (List.length category_seq_of_seeds - 1))
     (List.slice category_seq_of_seeds 1 (List.length category_seq_of_seeds))
 
@@ -49,7 +45,7 @@ let location_of_seed maps seed =
   let curr_id = ref seed in
   List.iter seed_category_path ~f:(fun curr_ptr ->
       let old_id = !curr_id in
-      let curr_map = Hashtbl.find maps curr_ptr |> Utils.option_unwrap in
+      let curr_map = Hashtbl.find maps curr_ptr |> option_unwrap in
       let curr_map_len = Array.length curr_map in
       let i = ref 0 in
       while !curr_id = old_id && !i < curr_map_len do
@@ -62,9 +58,9 @@ let location_of_seed maps seed =
   !curr_id
 
 let solve lines =
-  let line, lines = Utils.uncons lines in
+  let line, lines = uncons lines in
   let seeds =
-    line |> String.split ~on:':' |> List'.tl |> List'.hd |> String.strip
+    line |> String.split ~on:':' |> List.tl_exn |> List.hd_exn |> String.strip
     |> String.split ~on:' ' |> List.map ~f:Int.of_string
   in
   let maps = Hashtbl.create (module CategoryPair) in
@@ -75,19 +71,19 @@ let solve lines =
       if not (String.is_empty line) then
         if String.is_substring ~substring:"map" line then
           let ids =
-            line |> String.split ~on:' ' |> List'.hd
-            |> Utils.split_on_substring ~substring:"-to-"
+            line |> String.split ~on:' ' |> List.hd_exn
+            |> UString.split_on_substr ~substr:"-to-"
           in
-          map_ptr := List.map ~f:category_of_string ids |> Utils.list_to_tuple
+          map_ptr := List.map ~f:category_of_string ids |> UList.to_tuple_exn
         else
           let spec =
             line |> String.split ~on:' ' |> List.map ~f:Int.of_string
           in
-          append_to_array maps !map_ptr (Utils.list_to_triple spec));
+          append_to_array maps !map_ptr (UList.to_triple_exn spec));
 
   (*Then we find the min location*)
   List.map seeds ~f:(location_of_seed maps) |> fun locations ->
-  List.fold_left ~f:min ~init:(List'.hd locations) (List'.tl locations)
+  List.fold_left ~f:min ~init:(List.hd_exn locations) (List.tl_exn locations)
 
 let main input = In_channel.read_lines input |> solve |> Printf.printf "%d\n"
 

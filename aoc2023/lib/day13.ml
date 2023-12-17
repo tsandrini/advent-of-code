@@ -1,4 +1,5 @@
 open Core
+open Utils
 
 let is_horizontal_reflection ?(smudge = false) mat line =
   let len = List.length mat in
@@ -22,18 +23,18 @@ let is_horizontal_reflection ?(smudge = false) mat line =
       if line + i + 1 >= len then true
       else if check (line - i) (line + i + 1) then true
       else false)
-  |> Utils.list_all_true
+  |> UList.fold_all_true
   |> fun x -> x && !smudge_check
 
 let parse input =
-  Utils.split_on_substring ~substring:"\n\n" input
+  UString.split_on_substr ~substr:"\n\n" input
   |> List.map ~f:(fun mat ->
          String.split_lines mat |> List.map ~f:String.to_list)
 
 let solve matrices =
   let solver ~smudge =
     List.fold matrices ~init:0 ~f:(fun acc mat ->
-        let mat_t = Utils.transpose mat in
+        let mat_t = UMat.transpose mat in
         let horizontal_width =
           List.init (List.length mat - 1) ~f:(fun i -> i)
           |> List.filter ~f:(is_horizontal_reflection ~smudge mat)

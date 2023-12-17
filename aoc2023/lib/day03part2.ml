@@ -1,9 +1,7 @@
-module List' = List
-
 open Core
 
 let with_borders lines =
-  let len = List'.hd lines |> String.length in
+  let len = List.hd_exn lines |> String.length in
   let dots = String.make (len + 2) '.' in
   List.map ~f:(fun x -> "." ^ x ^ ".") lines |> fun x -> dots :: (x @ [ dots ])
 
@@ -18,7 +16,7 @@ let is_num_in_bounds n i j =
     (List.range 0 n.str_len)
 
 let solve lines =
-  let width = List'.hd lines |> String.length in
+  let width = List.hd_exn lines |> String.length in
   let height = List.length lines in
   let lines = with_borders lines in
   let i = ref 1 in
@@ -28,9 +26,9 @@ let solve lines =
   while !i <= width do
     let j = ref 1 in
     while !j <= height do
-      let line = List'.nth lines !i |> String.to_list in
+      let line = List.nth_exn lines !i |> String.to_list in
 
-      if List'.nth line !j |> Char.is_digit then (
+      if List.nth_exn line !j |> Char.is_digit then (
         let num_str =
           List.slice line !j (width + 1)
           |> List.take_while ~f:Char.is_digit
@@ -54,8 +52,8 @@ let solve lines =
   while !i <= width do
     let j = ref 1 in
     while !j <= height do
-      let line = List'.nth lines !i |> String.to_list in
-      (if Char.(List'.nth line !j = '*') then
+      let line = List.nth_exn lines !i |> String.to_list in
+      (if Char.(List.nth_exn line !j = '*') then
          let nums_in_bounds =
            List.filter !nums ~f:(fun x -> is_num_in_bounds x !i !j)
          in

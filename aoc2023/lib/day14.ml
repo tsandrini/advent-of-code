@@ -1,4 +1,5 @@
 open Core
+open Utils
 
 type direction = E | W | N | S
 
@@ -21,8 +22,8 @@ let roll_rocks_east grid =
 let roll_rocks grid = function
   | E -> roll_rocks_east grid
   | W -> List.map grid ~f:List.rev |> roll_rocks_east |> List.map ~f:List.rev
-  | N -> Utils.rotate_cw_90 grid |> roll_rocks_east |> Utils.rotate_ccw_90
-  | S -> Utils.transpose grid |> roll_rocks_east |> Utils.transpose
+  | N -> UMat.rot_90cw grid |> roll_rocks_east |> UMat.rot_90ccw
+  | S -> UMat.transpose grid |> roll_rocks_east |> UMat.transpose
 
 let one_cycle grid =
   ((roll_rocks grid N |> fun g -> roll_rocks g W) |> fun g -> roll_rocks g S)
@@ -46,8 +47,8 @@ let solve grid =
   let part1 = roll_rocks grid N |> List.rev |> compute_north_load in
   let cycle_start, cycle_end, grid_cycle_state = loop_until_cycle grid in
   let final_grid_state =
-    Utils.apply_n_times one_cycle
-      (((num_cycles - cycle_start) % (cycle_end - cycle_start)) - 1)
+    apply_n_times one_cycle
+      ~n:(((num_cycles - cycle_start) % (cycle_end - cycle_start)) - 1)
       grid_cycle_state
   in
   let part2 = final_grid_state |> List.rev |> compute_north_load in

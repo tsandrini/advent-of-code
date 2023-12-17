@@ -1,6 +1,5 @@
-module List' = List
-module String' = String
 open Core
+open Utils
 
 type grid_node_type =
   | Ground
@@ -88,7 +87,7 @@ let init_start tbl ~start_pos:(x, y) =
   in
   [ left; right; up; down ]
   |> List.filter ~f:(fun x -> match x with Some (_, _) -> true | _ -> false)
-  |> List.map ~f:Utils.option_unwrap
+  |> List.map ~f:option_unwrap
 
 let find_cycle tbl ~start_pos ~dim:(width, height) =
   let loop = ref true in
@@ -107,7 +106,7 @@ let find_cycle tbl ~start_pos ~dim:(width, height) =
     if compare_grid_node_type curr_node_type Start = 0 then loop := false
     else if is_some next then (
       prev_node := !curr_node;
-      curr_node := Utils.option_unwrap next;
+      curr_node := option_unwrap next;
       cycle := !curr_node :: !cycle)
     else (
       i := !i + 1;

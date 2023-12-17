@@ -1,18 +1,17 @@
-module List' = List
 open Core
-
+open Utils
 
 let solve lines =
   List.map lines ~f:(fun line ->
-      line |> String.split ~on:':' |> List'.tl |> List'.hd |> String.strip
-      |> Utils.reduce_multiple_whitespaces |> String.split ~on:'|'
+      line |> String.split ~on:':' |> List.tl_exn |> List.hd_exn |> String.strip
+      |> UString.reduce_multiple_whitespaces |> String.split ~on:'|'
       |> List.map ~f:String.strip
       |> List.map ~f:(String.split ~on:' ')
       |> List.map ~f:(List.map ~f:Int.of_string)
-      |> Utils.list_to_tuple
+      |> UList.to_tuple_exn
       |> (fun (x, y) -> List.filter ~f:(fun el -> List.mem x el ~equal:( = )) y)
       |> List.length |> fun num -> (if num < 2 then num else Int.pow 2 (num - 1)))
-  |> List.fold_left ~f:( + ) ~init:0
+  |> UList.fold_sum
 
 let main input = In_channel.read_lines input |> solve |> Printf.printf "%d\n"
 

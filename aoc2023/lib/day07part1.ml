@@ -1,10 +1,5 @@
-(* Utop line *)
-(* #use "topfind";; #require "core";; #require "ppx_jane";; #require "ppx_deriving";; #require "ppx_deriving.std";; #require "ppx_inline_test";; #require "ppx_hash";; #require "ppx_sexp_conv";; #require "ppx_compare";; *)
-
-
-module List' = List
-module String' = String
 open Core
+open Utils
 
 type card =
   | A
@@ -61,10 +56,10 @@ let hand_of_card_list = function
       in
       if unique_num = 1 then { hand_type = FiveOfAKind; cards }
       else if unique_num = 2 then
-        if List'.hd freq_count = 4 then { hand_type = FourOfAKind; cards }
+        if List.hd_exn freq_count = 4 then { hand_type = FourOfAKind; cards }
         else { hand_type = FullHouse; cards }
       else if unique_num = 3 then
-        if List'.hd freq_count = 3 then { hand_type = ThreeOfAKind; cards }
+        if List.hd_exn freq_count = 3 then { hand_type = ThreeOfAKind; cards }
         else { hand_type = TwoPair; cards }
       else if unique_num = 4 then { hand_type = OnePair; cards }
       else { hand_type = HighCard; cards }
@@ -77,20 +72,20 @@ let compare_hands (first, _) (second, _) =
       List.map2_exn first.cards second.cards ~f:compare_card
       |> List.filter ~f:(fun x -> x <> 0)
     in
-    if List.length cmp_individual_cards <> 0 then List'.hd cmp_individual_cards
+    if List.length cmp_individual_cards <> 0 then List.hd_exn cmp_individual_cards
     else 0
   else cmp_hand
 
 let solve lines =
   List.map lines ~f:(fun line ->
-      String.strip line |> String.split ~on:' ' |> Utils.list_to_tuple
+      String.strip line |> String.split ~on:' ' |> UList.to_tuple_exn
       |> fun (card, bid) ->
       ( String.to_list card |> List.map ~f:card_of_char |> hand_of_card_list,
         Int.of_string bid ))
   |> List.sort ~compare:compare_hands
   |> List.rev
   |> List.mapi ~f:(fun idx (_, bid) -> (idx + 1) * bid)
-  |> List.fold_left ~f:( + ) ~init:0
+  |> UList.fold_sum
 
 let main input =
   In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

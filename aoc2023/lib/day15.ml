@@ -1,4 +1,5 @@
 open Core
+open Utils
 
 let hash str =
   String.to_list str
@@ -30,7 +31,7 @@ let focusing_power_of_conf seqs =
   List.iter seqs ~f:(fun seq ->
       if String.contains seq '=' then
         let str_id, focal_len =
-          String.split seq ~on:'=' |> Utils.list_to_tuple
+          String.split seq ~on:'=' |> UList.to_tuple_exn
         in
         let label = hash str_id in
         map_list_append_or_rewrite ~tbl:map ~key:label
@@ -47,7 +48,7 @@ let focusing_power_of_conf seqs =
               acc' + (focal_len * (i + 1))))
 
 let solve seqs =
-  let part1 = List.map seqs ~f:hash |> Utils.sum in
+  let part1 = List.map seqs ~f:hash |> UList.fold_sum in
   let part2 = focusing_power_of_conf seqs in
   Printf.printf "Part 1: %d\n" part1;
   Printf.printf "Part 2: %d\n" part2

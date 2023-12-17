@@ -1,7 +1,6 @@
-module List' = List
-module String' = String
 module StringMap = Map.Make (String)
 open Core
+open Utils
 
 let sum_by_identifier lst =
   let update_map acc (value, key) =
@@ -34,10 +33,10 @@ let power_of_game game_spec =
     |> List.map
          ~f:
            (List.map ~f:(fun x ->
-                String.strip x |> String.split ~on:' ' |> Utils.list_to_tuple
+                String.strip x |> String.split ~on:' ' |> UList.to_tuple_exn
                 |> fun (id, color) -> (Int.of_string id, color)))
     |> List.map ~f:sum_by_identifier
-    |> List'.flatten |> find_max_values
+    |> List.concat |> find_max_values
   in
   strmap_opt_to_int "red" max_values
   * strmap_opt_to_int "blue" max_values
@@ -47,11 +46,11 @@ let solve lines =
   lines
   |> List.map ~f:(fun line ->
          let game_spec =
-           String.split ~on:':' line |> List.map ~f:String.strip |> List'.tl
-           |> List'.hd |> String.strip
+           String.split ~on:':' line |> List.map ~f:String.strip |> List.tl_exn
+           |> List.hd_exn |> String.strip
          in
          power_of_game game_spec)
-  |> List.fold_left ~f:( + ) ~init:0
+  |> UList.fold_sum
 
 let main input =
   In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

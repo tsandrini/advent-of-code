@@ -1,6 +1,5 @@
-module List' = List
-module String' = String
 open Core
+open Utils
 
 let differences_of_list lst =
   let rec aux acc = function
@@ -25,14 +24,14 @@ let predict_prev_value histories =
   let curr_value = ref 0 in
   List.iter
     (List.drop (List.rev histories) 1)
-    ~f:(fun history -> curr_value := List'.hd history - !curr_value);
+    ~f:(fun history -> curr_value := List.hd_exn history - !curr_value);
   !curr_value
 
 let solve lines =
   List.map lines ~f:(fun line ->
       String.split line ~on:' ' |> List.map ~f:Int.of_string |> history_of_list
       |> predict_prev_value)
-  |> List.fold_left ~init:0 ~f:( + )
+  |> UList.fold_sum
 
 let main input =
   In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

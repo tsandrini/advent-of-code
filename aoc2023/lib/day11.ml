@@ -1,4 +1,5 @@
 open Core
+open Utils
 
 let int_node_type_of_char = function
   | '.' -> 0
@@ -20,13 +21,13 @@ let parse input =
   in
   let empty_rows =
     List.mapi space ~f:(fun i row ->
-        if List.fold_left ~init:0 ~f:( + ) row = 0 then i else -1)
+        if UList.fold_sum row = 0 then i else -1)
     |> List.filter ~f:(fun y -> y <> -1)
   in
   let empty_cols =
     transpose space
     |> List.mapi ~f:(fun i row ->
-           if List.fold_left ~init:0 ~f:( + ) row = 0 then i else -1)
+           if UList.fold_sum row = 0 then i else -1)
     |> List.filter ~f:(fun x -> x <> -1)
   in
   let galaxies = ref [] in

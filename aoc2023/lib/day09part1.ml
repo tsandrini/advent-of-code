@@ -1,6 +1,5 @@
-module List' = List
-module String' = String
 open Core
+open Utils
 
 let differences_of_list lst =
   let rec aux acc = function
@@ -32,7 +31,7 @@ let solve lines =
   List.map lines ~f:(fun line ->
       String.split line ~on:' ' |> List.map ~f:Int.of_string |> history_of_list
       |> predict_next_value)
-  |> List.fold_left ~init:0 ~f:( + )
+  |> UList.fold_sum
 
 let main input =
   In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

@@ -1,6 +1,5 @@
-module List' = List
-module String' = String
 open Core
+open Utils
 
 let digit_mappings =
   [
@@ -29,12 +28,12 @@ let parse_calibration_value line =
   double_stfoe line
   |> (fun x -> List.fold_left ~f:replace_word ~init:x digit_mappings)
   |> String.to_list |> List.filter ~f:Char.is_digit
-  |> (fun x -> (List'.hd x, List.rev x |> List'.hd))
+  |> (fun x -> (List.hd_exn x, List.rev x |> List.hd_exn))
   |> (fun (a, b) -> String.make 1 a ^ String.make 1 b)
   |> int_of_string
 
 let solve lines =
-  List.map ~f:parse_calibration_value lines |> List.fold_left ~f:( + ) ~init:0
+  List.map ~f:parse_calibration_value lines |> UList.fold_sum
 
 let main input =
   In_channel.read_lines input |> solve |> Printf.printf "Result: %d\n"

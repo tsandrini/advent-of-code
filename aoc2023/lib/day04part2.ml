@@ -1,26 +1,25 @@
-module List' = List
 open Core
-
+open Utils
 
 let process_spec spec num_games =
   let counter = Array.init num_games ~f:(fun _ -> 1) in
   for i = 0 to (num_games - 1) do
-    let spec = List'.nth spec i in
+    let spec = List.nth_exn spec i in
     List.iter spec ~f:(fun el -> counter.(el) <- counter.(el) + counter.(i))
   done;
-  List.fold_left (Array.to_list counter) ~init:0 ~f:(+)
+  UList.fold_sum (Array.to_list counter)
 
 let parse_spec lines =
   let num_games = List.length lines in
   let specs = ref [] in
   for i = 0 to (num_games - 1) do
-    let line = List'.nth lines i in
-    let spec = line |> String.split ~on:':' |> List'.tl |> List'.hd |> String.strip
-      |> Utils.reduce_multiple_whitespaces |> String.split ~on:'|'
+    let line = List.nth_exn lines i in
+    let spec = line |> String.split ~on:':' |> List.tl_exn |> List.hd_exn |> String.strip
+      |> UString.reduce_multiple_whitespaces |> String.split ~on:'|'
       |> List.map ~f:String.strip
       |> List.map ~f:(String.split ~on:' ')
       |> List.map ~f:(List.map ~f:Int.of_string)
-      |> Utils.list_to_tuple
+      |> UList.to_tuple_exn
       |> (fun (x, y) -> List.filter ~f:(fun el -> List.mem x el ~equal:( = )) y)
       |> List.length |> List.range 0 |> List.map ~f:(fun x -> x + i + 1)
       |> List.filter ~f:(fun x -> x <= num_games)

@@ -1,9 +1,5 @@
-(* Utop line *)
-(* #use "topfind";; #require "core";; #require "ppx_jane";; #require "ppx_deriving";; #require "ppx_deriving.std";; #require "ppx_inline_test";; #require "ppx_hash";; #require "ppx_sexp_conv";; #require "ppx_compare";; *)
-
-module List' = List
-module String' = String
 open Core
+open Utils
 
 type direction = Left | Right
 
@@ -13,7 +9,7 @@ let direction_of_char = function
   | _ -> failwith "Invalid direction"
 
 let solve lines =
-  let line, lines = Utils.uncons lines in
+  let line, lines = uncons lines in
   let directions = String.to_list line |> List.map ~f:direction_of_char in
   let maps = Hashtbl.create (module String) in
   let curr_ptr = ref "AAA" in
@@ -22,14 +18,14 @@ let solve lines =
   List.iter (List.drop lines 1) ~f:(fun line ->
       let key, values =
         String.filter line ~f:(fun c -> not (Char.is_whitespace c))
-        |> String.split ~on:'=' |> Utils.list_to_tuple
+        |> String.split ~on:'=' |> UList.to_tuple_exn
       in
       let values =
         String.sub values ~pos:1 ~len:(String.length values - 2)
-        |> String.split ~on:',' |> Utils.list_to_tuple
+        |> String.split ~on:',' |> UList.to_tuple_exn
       in
       Hashtbl.add_exn maps ~key ~data:values);
-  Utils.list_repeat_until directions ~f:(fun direction ->
+  UList.repeat_until directions ~f:(fun direction ->
       let left_val, right_val = Hashtbl.find_exn maps !curr_ptr in
       (curr_ptr := match direction with Left -> left_val | Right -> right_val);
       num_of_steps := !num_of_steps + 1;
