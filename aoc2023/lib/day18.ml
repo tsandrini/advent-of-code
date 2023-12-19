@@ -72,7 +72,7 @@ let solve processed_inp =
 
 let main = In_channel.read_all >> parse >> solve
 
-let%test "Day16 part1 - example data" =
+let%test "Day18 part1 - example data" =
   (parse >> part1)
     "R 6 (#70c710)\n\
      D 5 (#0dc571)\n\
@@ -90,7 +90,7 @@ let%test "Day16 part1 - example data" =
      U 2 (#7a21e3)"
   = 62
 
-let%test "Day16 part2 - example data" =
+let%test "Day18 part2 - example data" =
   (parse >> part2)
     "R 6 (#70c710)\n\
      D 5 (#0dc571)\n\
