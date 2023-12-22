@@ -3,6 +3,18 @@ open Utils
 
 let nth_flip = flip List.nth_exn
 
+type iter_node = {
+  id : string;
+  xmin : int;
+  xmax : int;
+  mmin : int;
+  mmax : int;
+  amin : int;
+  amax : int;
+  smin : int;
+  smax : int;
+}
+
 let get_cat = function
   | 'x' -> nth_flip 0
   | 'm' -> nth_flip 1
@@ -11,13 +23,15 @@ let get_cat = function
   | _ -> failwith "Invalid category"
 
 let parse_rule str =
-  if not (String.contains str ':') then (str, fun _ -> true)
+  if not (String.contains str ':') then (str, (str, ' ', '=', 0), fun _ -> true)
   else
     let str', target = String.split ~on:':' str |> UList.to_tuple_exn in
     let sep = if String.contains str' '<' then '<' else '>' in
     let op = if String.contains str' '<' then ( < ) else ( > ) in
     let id, arg = String.split ~on:sep str' |> UList.to_tuple_exn in
-    (target, fun x -> op ((get_cat (Char.of_string id)) x) (Int.of_string arg))
+    ( target,
+      (target, Char.of_string id, sep, Int.of_string arg),
+      fun x -> op ((get_cat (Char.of_string id)) x) (Int.of_string arg) )
 
 let is_rating_accepted ?(init_state = "in") ~tbl rating =
   let curr_state = ref init_state in
@@ -27,13 +41,92 @@ let is_rating_accepted ?(init_state = "in") ~tbl rating =
       && (Char.(!curr_state.[0] = 'A') || Char.(!curr_state.[0] = 'R')))
   do
     let rules = Hashtbl.find_exn tbl !curr_state in
-    UList.repeat_until rules ~f:(fun (target, rule) ->
+    UList.repeat_until rules ~f:(fun (target, _, rule) ->
         if rule rating then (
           curr_state := target;
           true)
         else false)
   done;
   Char.(!curr_state.[0] = 'A')
+
+let check_node_bounds node =
+  node.xmin <= node.xmax && node.mmin <= node.mmax && node.amin <= node.amax
+  && node.smin <= node.smax
+
+let volume_of_node node =
+  (node.xmax - node.xmin + 1)
+  * (node.mmax - node.mmin + 1)
+  * (node.amax - node.amin + 1)
+  * (node.smax - node.smin + 1)
+
+let transform_node ~spec:(target, id, op, arg) node =
+  let f min' max' =
+    match op with
+    | '<' -> (min', min max' (arg - 1))
+    | '>' -> (max min' (arg + 1), max')
+    | 'l' -> (min', min max' arg)
+    | 'g' -> (max min' arg, max')
+    | _ -> failwith "Invalid operator"
+  in
+  if Char.(op = '=') then { node with id = target }
+  else
+    match id with
+    | 'x' ->
+        let min', max' = f node.xmin node.xmax in
+        { node with id = target; xmin = min'; xmax = max' }
+    | 'm' ->
+        let min', max' = f node.mmin node.mmax in
+        { node with id = target; mmin = min'; mmax = max' }
+    | 'a' ->
+        let min', max' = f node.amin node.amax in
+        { node with id = target; amin = min'; amax = max' }
+    | 's' ->
+        let min', max' = f node.smin node.smax in
+        { node with id = target; smin = min'; smax = max' }
+    | _ -> failwith "Invalid category"
+
+let volume_of_accepted_subset ?(init_state = "in") ~tbl =
+  let vol = ref 0 in
+  let queue = Linked_queue.create () in
+  let curr_node =
+    ref
+      {
+        id = init_state;
+        xmin = 1;
+        xmax = 4000;
+        mmin = 1;
+        mmax = 4000;
+        amin = 1;
+        amax = 4000;
+        smin = 1;
+        smax = 4000;
+      }
+  in
+  Linked_queue.enqueue queue !curr_node;
+  while not (Linked_queue.is_empty queue) do
+    let node = Linked_queue.dequeue_exn queue in
+    (*Skip node if invalid bounds*)
+    if check_node_bounds node then (
+      if
+        String.length node.id = 1
+        && (Char.(node.id.[0] = 'R') || Char.(node.id.[0] = 'A'))
+      then
+        vol :=
+          !vol + if Char.(node.id.[0] = 'A') then volume_of_node node else 0
+      else
+        let rules = Hashtbl.find_exn tbl node.id in
+        curr_node := node;
+        List.iter rules ~f:(fun (_, spec, _) ->
+            let target, id, op, arg = spec in
+            Linked_queue.enqueue queue (transform_node ~spec !curr_node);
+
+            if Char.(op <> '=') then
+              curr_node :=
+                transform_node
+                  ~spec:(target, id, (if Char.(op = '>') then 'l' else 'g'), arg)
+                  !curr_node))
+  done;
+  !vol
 
 let parse input =
   let tbl = Hashtbl.create (module String) in
@@ -64,7 +157,7 @@ let part1 (tbl, ratings) =
   |> List.fold_left ~init:0 ~f:(fun acc rating ->
          List.fold_left rating ~init:acc ~f:( + ))
 
-let part2 (_, ratings) = List.length ratings
+let part2 (tbl, _) = volume_of_accepted_subset ~init_state:"in" ~tbl
 
 let solve processed_inp =
   Printf.printf "Part 1: %d\n" (part1 processed_inp);
