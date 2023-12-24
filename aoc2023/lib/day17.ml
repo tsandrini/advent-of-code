@@ -16,12 +16,6 @@ module ExtendedNodeTable = Hashtbl.Make (struct
     let compare en1 en2 = if equal en1 en2 then 0 else compare_node en1.pos en2.pos
   end)
 
-(* module NodeTable = Hashtbl.Make (struct *)
-(*     type t = node *)
-(*     let hash = Hashtbl.hash *)
-(*     let equal (x1, y1) (x2, y2) = x1 = x2 && y1 = y2 *)
-(*   end) *)
-
 let print_path ~width ~height path =
   let grid = Array.make_matrix ~dimy:height ~dimx:width '.' in
 
@@ -35,7 +29,7 @@ let print_path ~width ~height path =
   done
 
 
-let manhattan_dist _ _ = 0
+let manhattan_dist (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
 
 let at ~dim:(width, _) grid (x, y) =
   grid.(y * width + x)
@@ -73,23 +67,23 @@ let generate_neighbors ~dim:(width, height) ({pos = (x, y); last_move; consecuti
       Some {pos = new_position; last_move = move; consecutive_moves = new_consecutive_moves}
   ) moves |> List.filter ~f:(fun en -> not (is_ouf_of_bounds en))
 
-let h_of_grid ~dim ~grid (x, y) =
-  at ~dim grid (x, y)
+let h_of_grid ~dim ~grid (_, _) (x2, y2) =
+  at ~dim grid (x2, y2)
 
-let astar ~dim:(width, height) ~start_pos ~goal_pos ~heuristic _ =
+let astar ~dim:(width, height) ~start_pos ~goal_pos ~heuristic ~cost _ =
   let open_set = Pairing_heap.create ~cmp:(fun (_, c1) (_, c2) -> Int.compare c1 c2) ()
-  and closed_set = ExtendedNodeTable.create ~size:(3 * width * height) ()
-  and g_score = ExtendedNodeTable.create ~size:(3 * width * height) ()
-  and came_from = ExtendedNodeTable.create ~size:(3 * width * height) () in
+  and closed_set = ExtendedNodeTable.create ~size:(10 * width * height) ()
+  and g_score = ExtendedNodeTable.create ~size:(10 * width * height) ()
+  and came_from = ExtendedNodeTable.create ~size:(10 * width * height) () in
 
-  let start_node = { pos = start_pos; last_move = Right; consecutive_moves = -1 } in
+  let start_node = { pos = start_pos; last_move = Left; consecutive_moves = -1 } in
   ExtendedNodeTable.add_exn g_score ~key:start_node ~data:0;
   Pairing_heap.add open_set (start_node, 0);
 
   let rec reconstruct_path current acc =
     match ExtendedNodeTable.find came_from current with
-    | None -> acc
-    | Some prev -> reconstruct_path prev (prev.pos :: acc)
+    | None -> List.rev acc
+    | Some prev -> reconstruct_path prev (current.pos :: acc)
   in
 
   let rec main_loop () =
@@ -97,34 +91,34 @@ let astar ~dim:(width, height) ~start_pos ~goal_pos ~heuristic _ =
       let curr, current_cost = Pairing_heap.pop_exn open_set in
 
       if (compare_node curr.pos goal_pos) = 0 then
-        let path_cost = ExtendedNodeTable.find_exn g_score curr in
-        Some (path_cost, reconstruct_path curr [curr.pos])
+        Some (reconstruct_path curr [], ExtendedNodeTable.find_exn g_score curr)
       else begin
         generate_neighbors ~dim:(width, height) curr
         |> List.iter ~f:(fun neighbor ->
             if not (ExtendedNodeTable.mem closed_set neighbor) then
-              let total_cost = current_cost + heuristic  neighbor.pos in
+              let tentative_g_score = current_cost + cost curr.pos neighbor.pos in
 
               let is_better_path = match ExtendedNodeTable.find g_score neighbor with
                 | None -> true
-                | Some existing_g_score -> total_cost < existing_g_score
+                | Some existing_g_score -> tentative_g_score < existing_g_score
               in
 
               if is_better_path then begin
                 ExtendedNodeTable.set came_from ~key:neighbor ~data:curr;
-                ExtendedNodeTable.set g_score ~key:neighbor ~data:total_cost;
+                ExtendedNodeTable.set g_score ~key:neighbor ~data:tentative_g_score;
+                let total_cost = tentative_g_score + heuristic neighbor.pos goal_pos in
                 Pairing_heap.add open_set (neighbor, total_cost)
               end
           );
 
-        ExtendedNodeTable.add_exn closed_set ~key:curr ~data:true;
+        if not (ExtendedNodeTable.mem closed_set curr) then
+          ExtendedNodeTable.add_exn closed_set ~key:curr ~data:true;
         main_loop ()
       end
     else
       None
   in
   main_loop ()
-
 
 let parse input =
   let lines = String.split_lines input |> List.map ~f:(String.to_list >> List.map ~f:(Char.to_string >> Int.of_string)) in
@@ -135,9 +129,10 @@ let parse input =
 let part1 (grid, (width, height)) =
   let start_pos = (0, 0)
   and goal_pos = (width - 1, height - 1)
-  and heuristic = h_of_grid ~dim:(width, height) ~grid
-  in match astar ~dim:(width, height) ~start_pos ~goal_pos ~heuristic grid with
-  | Some (cost, path) -> Printf.printf "Path: %s\n" (List.map path ~f:(fun (x, y) -> sprintf "(%d, %d)" x y) |> String.concat ~sep:" -> "); print_path ~width ~height path; print_path_vals ~gr:grid ~width ~height path; cost
+  and cost = h_of_grid ~dim:(width, height) ~grid
+  and heuristic _ _ = 0
+  in match astar ~dim:(width, height) ~start_pos ~goal_pos ~cost ~heuristic grid with
+  | Some (path, cost) -> Printf.printf "Path: %s\n" (List.map path ~f:(fun (x, y) -> sprintf "(%d, %d)" x y) |> String.concat ~sep:" -> "); print_path ~width ~height path; print_path_vals ~gr:grid ~width ~height path; cost
   | None -> failwith "No path found"
 
 let part2 (grid, _) = Array.length grid
