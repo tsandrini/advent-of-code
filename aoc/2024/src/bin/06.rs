@@ -65,6 +65,8 @@ pub fn part_two(input: &str) -> Option<usize> {
     let (guard_pos, grid) = parse(input);
     let (rows, cols) = (grid.len() as isize, grid[0].len() as isize);
 
+    // Thanks to https://github.com/pedryx for suggestions to speed up the
+    // computation <3
     Some(
         compute_traversal(&grid, guard_pos, (cols, rows))
             .par_iter()
