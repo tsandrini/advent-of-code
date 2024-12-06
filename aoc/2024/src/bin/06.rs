@@ -3,55 +3,11 @@ advent_of_code::solution!(6);
 use itertools::Itertools;
 use std::collections::HashSet;
 
-struct GridCombinations {
-    grid: Vec<Vec<char>>,
-    positions: Vec<(usize, usize)>,
-    current: usize,
-}
-
-impl GridCombinations {
-    fn new(grid: &str) -> Self {
-        let grid: Vec<Vec<char>> = grid.lines().map(|line| line.chars().collect()).collect();
-        let positions = grid
-            .iter()
-            .enumerate()
-            .flat_map(|(row, line)| {
-                line.iter()
-                    .enumerate()
-                    .filter_map(move |(col, &c)| if c == '.' { Some((row, col)) } else { None })
-            })
-            .collect();
-        GridCombinations {
-            grid,
-            positions,
-            current: 0,
-        }
-    }
-}
-
-impl Iterator for GridCombinations {
-    type Item = Vec<Vec<char>>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.current >= self.positions.len() {
-            return None;
-        }
-
-        let (row, col) = self.positions[self.current];
-        self.current += 1;
-
-        // Clone the grid and modify the specific cell
-        let mut new_grid = self.grid.clone();
-        new_grid[row][col] = '#';
-
-        Some(new_grid)
-    }
-}
-
-pub fn part_one(input: &str) -> Option<usize> {
-    let (guard_pos, grid) = parse(input);
-    let (rows, cols) = (grid.len() as isize, grid[0].len() as isize);
-
+fn compute_traversal(
+    grid: &Vec<Vec<char>>,
+    guard_pos: (isize, isize),
+    size: (isize, isize),
+) -> HashSet<(isize, isize)> {
     let mut direction = (0, -1); // Starting ^
     let mut pos = guard_pos;
     let mut visited = HashSet::new();
@@ -60,7 +16,7 @@ pub fn part_one(input: &str) -> Option<usize> {
     loop {
         let new_pos = (pos.0 + direction.0, pos.1 + direction.1);
 
-        if new_pos.0 < 0 || new_pos.0 >= cols || new_pos.1 < 0 || new_pos.1 >= rows {
+        if new_pos.0 < 0 || new_pos.0 >= size.0 || new_pos.1 < 0 || new_pos.1 >= size.1 {
             break;
         } else if grid[new_pos.1 as usize][new_pos.0 as usize] == '#' {
             direction = (-direction.1, direction.0); // 2d rotation matrix for 90 degrees
@@ -70,7 +26,7 @@ pub fn part_one(input: &str) -> Option<usize> {
         }
     }
 
-    Some(visited.len())
+    visited
 }
 
 fn is_cyclic(grid: &Vec<Vec<char>>, guard_pos: (isize, isize), size: (isize, isize)) -> bool {
@@ -97,14 +53,27 @@ fn is_cyclic(grid: &Vec<Vec<char>>, guard_pos: (isize, isize), size: (isize, isi
     false
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_one(input: &str) -> Option<usize> {
     let (guard_pos, grid) = parse(input);
     let (rows, cols) = (grid.len() as isize, grid[0].len() as isize);
 
+    Some(compute_traversal(&grid, guard_pos, (cols, rows)).len())
+}
+
+pub fn part_two(input: &str) -> Option<usize> {
+    let (guard_pos, mut grid) = parse(input);
+    let (rows, cols) = (grid.len() as isize, grid[0].len() as isize);
+
     Some(
-        GridCombinations::new(input)
-            .filter(|grid| is_cyclic(grid, guard_pos, (cols, rows)))
-            .count() as u32,
+        compute_traversal(&grid, guard_pos, (cols, rows))
+            .iter()
+            .filter(|&pos| {
+                grid[pos.1 as usize][pos.0 as usize] = '#';
+                let x = is_cyclic(&grid, guard_pos, (cols, rows));
+                grid[pos.1 as usize][pos.0 as usize] = '.';
+                x
+            })
+            .count(),
     )
 }
 
