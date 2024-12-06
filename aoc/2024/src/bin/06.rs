@@ -1,16 +1,17 @@
 advent_of_code::solution!(6);
 
 use itertools::Itertools;
-use std::collections::HashSet;
+use rayon::prelude::*;
+use rustc_hash::FxHashSet;
 
 fn compute_traversal(
     grid: &Vec<Vec<char>>,
     guard_pos: (isize, isize),
     size: (isize, isize),
-) -> HashSet<(isize, isize)> {
+) -> FxHashSet<(isize, isize)> {
     let mut direction = (0, -1); // Starting ^
     let mut pos = guard_pos;
-    let mut visited = HashSet::new();
+    let mut visited = FxHashSet::default();
     visited.insert(pos);
 
     loop {
@@ -32,7 +33,7 @@ fn compute_traversal(
 fn is_cyclic(grid: &Vec<Vec<char>>, guard_pos: (isize, isize), size: (isize, isize)) -> bool {
     let mut direction = (0, -1); // Starting ^
     let mut pos = guard_pos;
-    let mut visited = HashSet::new();
+    let mut visited = FxHashSet::default();
     visited.insert((pos, direction));
 
     loop {
@@ -61,17 +62,18 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let (guard_pos, mut grid) = parse(input);
+    let (guard_pos, grid) = parse(input);
     let (rows, cols) = (grid.len() as isize, grid[0].len() as isize);
 
     Some(
         compute_traversal(&grid, guard_pos, (cols, rows))
-            .iter()
+            .par_iter()
             .filter(|&pos| {
-                grid[pos.1 as usize][pos.0 as usize] = '#';
-                let x = is_cyclic(&grid, guard_pos, (cols, rows));
-                grid[pos.1 as usize][pos.0 as usize] = '.';
-                x
+                // Clone the grid and patch '#' at current position
+                let mut patched_grid = grid.clone();
+                patched_grid[pos.1 as usize][pos.0 as usize] = '#';
+
+                is_cyclic(&patched_grid, guard_pos, (cols, rows))
             })
             .count(),
     )
