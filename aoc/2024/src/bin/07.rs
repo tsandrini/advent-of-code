@@ -1,22 +1,21 @@
 advent_of_code::solution!(7);
 
 use itertools::Itertools;
+use rayon::iter::ParallelBridge;
+use rayon::iter::ParallelIterator;
 use rayon::prelude::*;
 
-fn parse(input: &str) -> Vec<(u64, Vec<u64>)> {
-    input
-        .lines()
-        .map(|line| {
-            let (test_vals, nums) = line.split_once(":").unwrap();
-            (
-                test_vals.parse().unwrap(),
-                nums.trim()
-                    .split_whitespace()
-                    .map(|n| n.parse().unwrap())
-                    .collect_vec(),
-            )
-        })
-        .collect_vec()
+fn parse<'a>(input: &'a str) -> impl ParallelIterator<Item = (u64, Vec<u64>)> + 'a {
+    input.lines().par_bridge().map(|line| {
+        let (test_vals, nums) = line.split_once(":").unwrap();
+        (
+            test_vals.parse().unwrap(),
+            nums.trim()
+                .split_whitespace()
+                .map(|n| n.parse().unwrap())
+                .collect_vec(),
+        )
+    })
 }
 
 fn concat(a: u64, b: u64) -> u64 {
@@ -31,20 +30,22 @@ fn concat(a: u64, b: u64) -> u64 {
 
 fn check_base_arithmetic(nums: &[u64], target: u64) -> bool {
     let ranges = vec![[0u8, 1u8]; nums.len()];
-    ranges.into_iter().multi_cartesian_product().any(|indices| {
-        let sum = nums.iter().zip(indices).fold(0, |acc, (n, i)| match i {
-            0 => acc + n,
-            1 => acc * n,
-            _ => unreachable!(),
-        });
-        sum == target
-    })
+    ranges
+        .into_iter()
+        .multi_cartesian_product()
+        .par_bridge()
+        .any(|indices| {
+            nums.iter().zip(indices).fold(0, |acc, (n, i)| match i {
+                0 => acc + n,
+                1 => acc * n,
+                _ => unreachable!(),
+            }) == target
+        })
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
     Some(
         parse(input)
-            .par_iter()
             .filter(|(test_val, nums)| check_base_arithmetic(nums, *test_val))
             .map(|(test_val, _)| test_val)
             .sum::<u64>(),
@@ -52,10 +53,8 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let eqs = parse(input);
-    let (valid, dubious): (Vec<_>, Vec<_>) = eqs
-        .par_iter()
-        .partition(|(test_val, nums)| check_base_arithmetic(nums, *test_val));
+    let (valid, dubious): (Vec<_>, Vec<_>) =
+        parse(input).partition(|(test_val, nums)| check_base_arithmetic(nums, *test_val));
 
     Some(
         valid.par_iter().map(|(test_val, _)| test_val).sum::<u64>()
@@ -64,13 +63,12 @@ pub fn part_two(input: &str) -> Option<u64> {
                 .filter(|(test_val, nums)| {
                     let ranges = vec![[0u8, 1u8, 2u8]; nums.len()];
                     ranges.into_iter().multi_cartesian_product().any(|indices| {
-                        let sum = nums.iter().zip(indices).fold(0, |acc, (n, i)| match i {
+                        nums.iter().zip(indices).fold(0, |acc, (n, i)| match i {
                             0 => acc + n,
                             1 => acc * n,
                             2 => concat(acc, *n),
                             _ => unreachable!(),
-                        });
-                        sum == *test_val
+                        }) == *test_val
                     })
                 })
                 .map(|(test_val, _)| test_val)
