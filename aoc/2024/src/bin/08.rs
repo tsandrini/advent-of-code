@@ -12,10 +12,10 @@ fn parse(input: &str) -> (FxHashMap<char, Vec<(i32, i32)>>, (i32, i32)) {
     let (rows, cols) = (grid.len() as i32, grid[0].len() as i32);
 
     let cache: FxHashMap<char, Vec<(i32, i32)>> = grid
-        .par_iter()
+        .iter()
         .enumerate()
         .flat_map(|(i, row)| {
-            row.par_iter().enumerate().filter_map(move |(j, &cell)| {
+            row.iter().enumerate().filter_map(move |(j, &cell)| {
                 if cell != '.' {
                     Some((cell, (i as i32, j as i32)))
                 } else {
@@ -23,14 +23,8 @@ fn parse(input: &str) -> (FxHashMap<char, Vec<(i32, i32)>>, (i32, i32)) {
                 }
             })
         })
-        .fold(FxHashMap::default, |mut acc, (cell, coord)| {
+        .fold(FxHashMap::default(), |mut acc, (cell, coord)| {
             acc.entry(cell).or_insert_with(Vec::new).push(coord);
-            acc
-        })
-        .reduce(FxHashMap::default, |mut acc, map| {
-            for (cell, coords) in map {
-                acc.entry(cell).or_insert_with(Vec::new).extend(coords);
-            }
             acc
         });
 
@@ -66,20 +60,23 @@ pub fn part_one(input: &str) -> Option<i32> {
             .flat_map(|(_, coords)| {
                 coords
                     .into_iter()
-                    .permutations(2)
+                    .combinations(2)
                     .par_bridge()
-                    .map(|pair| {
-                        let antinode = (
-                            pair[0].0 + (pair[0].0 - pair[1].0),
-                            pair[0].1 + (pair[0].1 - pair[1].1),
-                        );
-
-                        (antinode, !out_of_bounds(antinode, (rows, cols)))
+                    .flat_map(|pair| {
+                        vec![
+                            (
+                                pair[0].0 + (pair[0].0 - pair[1].0),
+                                pair[0].1 + (pair[0].1 - pair[1].1),
+                            ),
+                            (
+                                pair[1].0 + (pair[1].0 - pair[0].0),
+                                pair[1].1 + (pair[1].1 - pair[0].1),
+                            ),
+                        ]
                     })
+                    .filter(|coord| !out_of_bounds(*coord, (rows, cols)))
                     .collect::<Vec<_>>()
             })
-            .filter(|(_, is_antinode)| *is_antinode)
-            .map(|(coord, _)| coord)
             .unique()
             .count() as i32,
     )
@@ -116,9 +113,9 @@ pub fn part_two(input: &str) -> Option<i32> {
                             ),
                         ]
                     })
+                    .flatten()
                     .collect::<Vec<_>>()
             })
-            .flatten()
             .unique()
             .count() as i32,
     )
