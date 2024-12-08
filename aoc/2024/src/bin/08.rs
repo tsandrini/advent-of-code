@@ -4,7 +4,7 @@ use itertools::Itertools;
 use rayon::prelude::*;
 use rustc_hash::FxHashMap;
 
-fn parse(input: &str) -> (Vec<Vec<char>>, (i32, i32), FxHashMap<char, Vec<(i32, i32)>>) {
+fn parse(input: &str) -> (FxHashMap<char, Vec<(i32, i32)>>, (i32, i32)) {
     let grid = input
         .lines()
         .map(|line| line.chars().collect::<Vec<char>>())
@@ -34,7 +34,11 @@ fn parse(input: &str) -> (Vec<Vec<char>>, (i32, i32), FxHashMap<char, Vec<(i32, 
             acc
         });
 
-    (grid, (rows, cols), cache)
+    (cache, (rows, cols))
+}
+
+fn out_of_bounds(coord: (i32, i32), size: (i32, i32)) -> bool {
+    coord.0 < 0 || coord.1 < 0 || coord.0 >= size.0 || coord.1 >= size.1
 }
 
 fn gen_vector_of_antinodes_in_direction(
@@ -43,9 +47,8 @@ fn gen_vector_of_antinodes_in_direction(
     size: (i32, i32),
 ) -> Vec<(i32, i32)> {
     let mut out = vec![];
-
     let mut antinode = *start;
-    while antinode.0 >= 0 && antinode.1 >= 0 && antinode.0 < size.0 && antinode.1 < size.1 {
+    while !out_of_bounds(antinode, size) {
         out.push(antinode);
         antinode = (antinode.0 + direction.0, antinode.1 + direction.1);
     }
@@ -54,36 +57,26 @@ fn gen_vector_of_antinodes_in_direction(
 }
 
 pub fn part_one(input: &str) -> Option<i32> {
-    let (_, (rows, cols), cache) = parse(input);
+    let (cache, (rows, cols)) = parse(input);
 
     Some(
         cache
             .iter()
-            .flat_map(|(cell, coords)| {
-                let l = coords.len();
-                if l <= 1 {
-                    vec![]
-                } else {
-                    coords
-                        .into_iter()
-                        .permutations(2)
-                        .par_bridge()
-                        .map(|pair| {
-                            let x_dist = pair[0].0 - pair[1].0;
-                            let y_dist = pair[0].1 - pair[1].1;
-                            let antinode = (pair[0].0 + x_dist, pair[0].1 + y_dist);
-                            if antinode.0 < 0
-                                || antinode.1 < 0
-                                || antinode.0 >= rows
-                                || antinode.1 >= cols
-                            {
-                                (antinode, false)
-                            } else {
-                                (antinode, true)
-                            }
-                        })
-                        .collect::<Vec<_>>()
-                }
+            .filter(|(_, coords)| coords.len() > 1)
+            .flat_map(|(_, coords)| {
+                coords
+                    .into_iter()
+                    .permutations(2)
+                    .par_bridge()
+                    .map(|pair| {
+                        let antinode = (
+                            pair[0].0 + (pair[0].0 - pair[1].0),
+                            pair[0].1 + (pair[0].1 - pair[1].1),
+                        );
+
+                        (antinode, !out_of_bounds(antinode, (rows, cols)))
+                    })
+                    .collect::<Vec<_>>()
             })
             .filter(|(_, is_antinode)| *is_antinode)
             .map(|(coord, _)| coord)
@@ -93,41 +86,37 @@ pub fn part_one(input: &str) -> Option<i32> {
 }
 
 pub fn part_two(input: &str) -> Option<i32> {
-    let (_, (rows, cols), cache) = parse(input);
+    let (cache, (rows, cols)) = parse(input);
 
     Some(
         cache
             .iter()
-            .flat_map(|(cell, coords)| {
-                let l = coords.len();
-                if l <= 1 {
-                    vec![]
-                } else {
-                    coords
-                        .into_iter()
-                        .combinations(2)
-                        .par_bridge()
-                        .flat_map(|pair| {
-                            vec![
-                                gen_vector_of_antinodes_in_direction(
-                                    &pair[0],
-                                    ((pair[1].0 - pair[0].0), (pair[1].1 - pair[0].1)),
-                                    (rows, cols),
-                                ),
-                                gen_vector_of_antinodes_in_direction(
-                                    &pair[1],
-                                    ((pair[0].0 - pair[1].0), (pair[0].1 - pair[1].1)),
-                                    (rows, cols),
-                                ),
-                                gen_vector_of_antinodes_in_direction(
-                                    &pair[1],
-                                    ((pair[1].0 - pair[0].0), (pair[1].1 - pair[0].1)),
-                                    (rows, cols),
-                                ),
-                            ]
-                        })
-                        .collect::<Vec<_>>()
-                }
+            .filter(|(_, coords)| coords.len() > 1)
+            .flat_map(|(_, coords)| {
+                coords
+                    .into_iter()
+                    .combinations(2)
+                    .par_bridge()
+                    .flat_map(|pair| {
+                        vec![
+                            gen_vector_of_antinodes_in_direction(
+                                &pair[0],
+                                ((pair[1].0 - pair[0].0), (pair[1].1 - pair[0].1)),
+                                (rows, cols),
+                            ),
+                            gen_vector_of_antinodes_in_direction(
+                                &pair[1],
+                                ((pair[0].0 - pair[1].0), (pair[0].1 - pair[1].1)),
+                                (rows, cols),
+                            ),
+                            gen_vector_of_antinodes_in_direction(
+                                &pair[1],
+                                ((pair[1].0 - pair[0].0), (pair[1].1 - pair[0].1)),
+                                (rows, cols),
+                            ),
+                        ]
+                    })
+                    .collect::<Vec<_>>()
             })
             .flatten()
             .unique()
