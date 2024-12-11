@@ -3,7 +3,7 @@ advent_of_code::solution!(10);
 use petgraph::graph::{DiGraph, NodeIndex};
 use rayon::prelude::*;
 
-type GraphT = i16;
+type GraphT = i8;
 const DIRECTIONS: [(GraphT, GraphT); 4] = [(-1, 0), (0, -1), (0, 1), (1, 0)];
 
 fn is_in_bounds(i: GraphT, j: GraphT, rows: usize, cols: usize) -> bool {
@@ -16,7 +16,7 @@ fn parse(input: &str) -> DiGraph<GraphT, ()> {
         .lines()
         .map(|l| {
             l.chars()
-                .map(|c| c.to_digit(10).unwrap_or(100) as GraphT)
+                .map(|c| c.to_digit(10).unwrap() as GraphT)
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
