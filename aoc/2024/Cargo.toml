@@ -25,6 +25,7 @@ test_lib = []
 chrono = { version = "0.4.31", optional = true }
 dhat = { version = "0.3.2", optional = true }
 fxhash = "0.2.1"
+indicatif = "0.17.9"
 itertools = "0.13.0"
 petgraph = "0.6.5"
 pico-args = "0.5.0"

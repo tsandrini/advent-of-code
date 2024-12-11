@@ -1,8 +1,5 @@
 advent_of_code::solution!(9);
 
-use itertools::Itertools;
-use rayon::prelude::*;
-
 type FsBlockType = u64;
 const FS_FREE_SPACE_PT1: FsBlockType = FsBlockType::MAX;
 const FS_FREE_SPACE_PT2: FsBlockType = 0;
@@ -12,7 +9,7 @@ pub fn part_one(input: &str) -> Option<FsBlockType> {
         .trim()
         .chars()
         .enumerate()
-        .map(|(i, c)| {
+        .flat_map(|(i, c)| {
             vec![
                 if i % 2 == 0 {
                     (i / 2) as FsBlockType
@@ -22,7 +19,6 @@ pub fn part_one(input: &str) -> Option<FsBlockType> {
                 c.to_digit(10).unwrap() as usize
             ]
         })
-        .flatten()
         .collect::<Vec<_>>();
 
     let mut i = fs.len() - 1;

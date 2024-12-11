@@ -9,7 +9,9 @@ static MARKER: &str = "<!--- benchmarking table --->";
 
 #[derive(Debug)]
 pub enum Error {
+    #[allow(dead_code)]
     Parser(String),
+    #[allow(dead_code)]
     IO(io::Error),
 }
 
