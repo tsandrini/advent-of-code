@@ -1,6 +1,6 @@
 advent_of_code::solution!(12);
 
-use petgraph::graph::{Graph, NodeIndex};
+use petgraph::graph::Graph;
 use petgraph::visit::Dfs;
 use petgraph::Undirected;
 use rustc_hash::FxHashMap;
@@ -36,7 +36,6 @@ fn parse(
     (usize, usize),
     Graph<char, (), Undirected>,
     FxHashMap<usize, (GraphT, GraphT)>,
-    Vec<Vec<Option<NodeIndex>>>,
 ) {
     let grid = input
         .lines()
@@ -44,19 +43,23 @@ fn parse(
         .collect::<Vec<_>>();
 
     let (rows, cols) = (grid.len(), grid[0].len());
-
     let mut graph = Graph::new_undirected();
     let mut node_map = FxHashMap::default();
-    let mut node_grid = vec![vec![None; cols]; rows];
 
-    grid.iter().enumerate().for_each(|(i, row)| {
-        row.iter().enumerate().for_each(|(j, curr_group)| {
-            let node = graph.add_node(*curr_group);
-
-            node_map.insert(node.index(), (i as GraphT, j as GraphT));
-            node_grid[i][j] = Some(node);
-        });
-    });
+    let node_grid = grid
+        .iter()
+        .enumerate()
+        .map(|(i, row)| {
+            row.iter()
+                .enumerate()
+                .map(|(j, curr_group)| {
+                    let node = graph.add_node(*curr_group);
+                    node_map.insert(node.index(), (i as GraphT, j as GraphT));
+                    Some(node)
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
 
     grid.iter().enumerate().for_each(|(i, row)| {
         row.iter().enumerate().for_each(|(j, curr_group)| {
@@ -74,11 +77,11 @@ fn parse(
         });
     });
 
-    (grid, (rows, cols), graph, node_map, node_grid)
+    (grid, (rows, cols), graph, node_map)
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
-    let (grid, (rows, cols), graph, node_map, _) = parse(input);
+    let (grid, (rows, cols), graph, node_map) = parse(input);
 
     let mut visited = vec![false; graph.node_count()];
     let mut price = 0;
@@ -113,7 +116,7 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let (_, _, graph, node_map, _) = parse(input);
+    let (_, _, graph, node_map) = parse(input);
 
     let mut visited = vec![false; graph.node_count()];
     let mut price = 0;
