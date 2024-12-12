@@ -82,105 +82,107 @@ fn parse(
 
 pub fn part_one(input: &str) -> Option<usize> {
     let (grid, (rows, cols), graph, node_map) = parse(input);
-
     let mut visited = vec![false; graph.node_count()];
-    let mut price = 0;
 
-    for start in graph.node_indices() {
-        if visited[start.index()] {
-            continue;
-        }
+    Some(
+        graph
+            .node_indices()
+            .map(|start| {
+                if visited[start.index()] {
+                    return 0;
+                }
 
-        let mut area = 0;
-        let mut perimeter = 0;
-        let mut dfs = Dfs::new(&graph, start);
+                let mut area = 0;
+                let mut perimeter = 0;
+                let mut dfs = Dfs::new(&graph, start);
 
-        while let Some(node) = dfs.next(&graph) {
-            let (x, y) = node_map[&node.index()];
-            visited[node.index()] = true;
+                while let Some(node) = dfs.next(&graph) {
+                    let (x, y) = node_map[&node.index()];
+                    visited[node.index()] = true;
 
-            area += 1;
-            perimeter += DIRS
-                .iter()
-                .filter(|&(dx, dy)| {
-                    let (test_x, test_y) = (x + dx, y + dy);
-                    !is_in_bounds(test_x, test_y, rows, cols)
-                        || grid[test_x as usize][test_y as usize] != graph[node]
-                })
-                .count();
-        }
-        price += area * perimeter;
-    }
-
-    Some(price)
+                    area += 1;
+                    perimeter += DIRS
+                        .iter()
+                        .filter(|&(dx, dy)| {
+                            let (test_x, test_y) = (x + dx, y + dy);
+                            !is_in_bounds(test_x, test_y, rows, cols)
+                                || grid[test_x as usize][test_y as usize] != graph[node]
+                        })
+                        .count();
+                }
+                area * perimeter
+            })
+            .sum::<usize>(),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
     let (_, _, graph, node_map) = parse(input);
-
     let mut visited = vec![false; graph.node_count()];
-    let mut price = 0;
 
-    for start in graph.node_indices() {
-        if visited[start.index()] {
-            continue;
-        }
-
-        let mut area = 0;
-        let mut group = vec![];
-        let mut dfs = Dfs::new(&graph, start);
-        let mut group_corners = vec![];
-
-        while let Some(node) = dfs.next(&graph) {
-            let (x, y) = node_map[&node.index()];
-
-            visited[node.index()] = true;
-            area += 1;
-            group.push(node_map[&node.index()]);
-
-            group_corners.extend(
-                CORNER_DIRS
-                    .iter()
-                    .map(|&(dx, dy)| ((x as CornerT + dx), (y as CornerT + dy))),
-            );
-        }
-
-        let sides = unique_tuples_with_tolerance(group_corners, 0.3)
-            .iter()
-            .map(|(x, y)| {
-                let adj_corners = CORNER_DIRS
-                    .iter()
-                    .map(|&(dx, dy)| {
-                        let (test_x, test_y) = (
-                            (*x as CornerT + dx) as GraphT,
-                            (*y as CornerT + dy) as GraphT,
-                        );
-
-                        group.contains(&(test_x, test_y))
-                    })
-                    .collect::<Vec<_>>();
-
-                match adj_corners.iter().filter(|&&x| x).count() {
-                    3 | 1 => 1,
-                    2 => {
-                        if matches!(
-                            adj_corners.as_slice(),
-                            [true, false, false, true] | [false, true, true, false]
-                        ) {
-                            2 // opposite corners -> side
-                        } else {
-                            0 // same side -> adjacent corners -> not a side
-                        }
-                    }
-                    _ => 0,
+    Some(
+        graph
+            .node_indices()
+            .map(|start| {
+                if visited[start.index()] {
+                    return 0;
                 }
+
+                let mut area = 0;
+                let mut group = vec![];
+                let mut dfs = Dfs::new(&graph, start);
+                let mut group_corners = vec![];
+
+                while let Some(node) = dfs.next(&graph) {
+                    let (x, y) = node_map[&node.index()];
+
+                    visited[node.index()] = true;
+                    area += 1;
+                    group.push(node_map[&node.index()]);
+
+                    group_corners.extend(
+                        CORNER_DIRS
+                            .iter()
+                            .map(|&(dx, dy)| ((x as CornerT + dx), (y as CornerT + dy))),
+                    );
+                }
+
+                let sides = unique_tuples_with_tolerance(group_corners, 0.3)
+                    .iter()
+                    .map(|(x, y)| {
+                        let adj_corners = CORNER_DIRS
+                            .iter()
+                            .map(|&(dx, dy)| {
+                                let (test_x, test_y) = (
+                                    (*x as CornerT + dx) as GraphT,
+                                    (*y as CornerT + dy) as GraphT,
+                                );
+
+                                group.contains(&(test_x, test_y))
+                            })
+                            .collect::<Vec<_>>();
+
+                        match adj_corners.iter().filter(|&&x| x).count() {
+                            3 | 1 => 1,
+                            2 => {
+                                if matches!(
+                                    adj_corners.as_slice(),
+                                    [true, false, false, true] | [false, true, true, false]
+                                ) {
+                                    2 // opposite corners -> side
+                                } else {
+                                    0 // same side -> adjacent corners -> not a side
+                                }
+                            }
+                            _ => 0,
+                        }
+                    })
+                    .sum::<usize>();
+
+                area * sides
             })
-            .sum::<usize>();
-
-        price += area * sides;
-    }
-
-    Some(price)
+            .sum::<usize>(),
+    )
 }
 
 #[cfg(test)]
