@@ -17,6 +17,10 @@
   rustc,
   pkg-config,
   aoc-cli,
+  cbc,
+  bzip2,
+  zlib,
+  stdenv,
 }:
 let
   scripts = {
@@ -62,6 +66,10 @@ mkShell {
       rustc
       pkg-config
       aoc-cli
+      cbc
+      stdenv.cc.cc
+      zlib
+      bzip2
     ];
 
   shellHook = ''
