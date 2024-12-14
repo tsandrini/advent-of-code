@@ -21,6 +21,9 @@
   bzip2,
   zlib,
   stdenv,
+  # irust,
+  python3,
+  evcxr,
 }:
 let
   scripts = {
@@ -70,6 +73,15 @@ mkShell {
       stdenv.cc.cc
       zlib
       bzip2
+      # irust
+      evcxr
+      (python3.withPackages (
+        python-pkgs: with python-pkgs; [
+          # argparse
+          matplotlib
+          requests
+        ]
+      ))
     ];
 
   shellHook = ''
