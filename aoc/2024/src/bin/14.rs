@@ -73,6 +73,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     ))
 }
 
+#[allow(dead_code)]
 fn print_grid(points: &Vec<Point>, rows: PointT, cols: PointT) {
     let mut grid = vec![vec![0; cols as usize]; rows as usize];
     for (x, y) in points {
@@ -88,6 +89,7 @@ fn print_grid(points: &Vec<Point>, rows: PointT, cols: PointT) {
     }
 }
 
+#[allow(dead_code)]
 fn robots_to_byte_string(rbs: &Vec<Robot>, rows: PointT, cols: PointT) -> Vec<u8> {
     let mut grid = vec![vec![0; cols as usize]; rows as usize];
     for (x, y) in rbs.iter().map(|(p, _)| *p) {
@@ -104,35 +106,35 @@ fn robots_to_byte_string(rbs: &Vec<Robot>, rows: PointT, cols: PointT) -> Vec<u8
         .collect()
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    use entropy::shannon_entropy;
-    use rustc_hash::FxHashSet;
+pub fn part_two(_input: &str) -> Option<u32> {
+    // use entropy::shannon_entropy;
+    // use rustc_hash::FxHashSet;
     // Weird ahh problem, solved mostly by random propmting and looking at
     // random metrics, then plotting it. meh
     // let (rows, cols, seconds) = (7, 11, 100); // EXAMPLE
-    let (rows, cols, seconds) = (103, 101, 10000); // REAL INPUT
-    let mut cache = FxHashSet::default();
-    let hist = vec![];
-
-    let mut rbs = parse(input).collect::<Vec<_>>();
-    for i in 0..seconds {
-        rbs = rbs
-            .iter()
-            .map(|rb| move_robot(*rb, 1, cols, rows))
-            .collect();
-
-        if i % 10 == 0 {
-            let b = robots_to_byte_string(&rbs, rows, cols);
-            let ent = shannon_entropy(&b);
-            let sf = safety_factor(&rbs, rows, cols);
-            println!("i: {}, ent: {}, sf: {}", i, ent, sf)
-        }
-
-        if !cache.insert(sf) {
-            println!("Found repeating pattern at {:?} with {:?}", seconds, sf);
-            print_grid(&rbs.iter().map(|(p, _)| *p).collect::<Vec<_>>(), rows, cols);
-        }
-    }
+    //                                           // let (rows, cols, seconds) = (103, 101, 10000); // REAL INPUT
+    // let mut cache = FxHashSet::default();
+    // // let hist = vec![];
+    //
+    // let mut rbs = parse(input).collect::<Vec<_>>();
+    // for i in 0..seconds {
+    //     rbs = rbs
+    //         .iter()
+    //         .map(|rb| move_robot(*rb, 1, cols, rows))
+    //         .collect();
+    //
+    //     let b = robots_to_byte_string(&rbs, rows, cols);
+    //     let ent = shannon_entropy(&b);
+    //     let sf = safety_factor(&rbs, rows, cols);
+    //     if i % 10 == 0 {
+    //         println!("i: {}, ent: {}, sf: {}", i, ent, sf)
+    //     }
+    //
+    //     if !cache.insert(sf) {
+    //         println!("Found repeating pattern at {:?} with {:?}", seconds, sf);
+    //         print_grid(&rbs.iter().map(|(p, _)| *p).collect::<Vec<_>>(), rows, cols);
+    //     }
+    // }
 
     None
 }
