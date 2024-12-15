@@ -61,8 +61,8 @@ fn move_robot(rb: Robot, seconds: PointT, cols: PointT, rows: PointT) -> Robot {
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    // let (rows, cols, seconds) = (7, 11, 100); // EXAMPLE
-    let (rows, cols, seconds) = (103, 101, 100); // REAL INPUT
+    let (rows, cols, seconds) = (7, 11, 100); // EXAMPLE
+                                              // let (rows, cols, seconds) = (103, 101, 100); // REAL INPUT
 
     Some(safety_factor(
         &parse(input)
@@ -107,6 +107,8 @@ fn robots_to_byte_string(rbs: &Vec<Robot>, rows: PointT, cols: PointT) -> Vec<u8
 pub fn part_two(input: &str) -> Option<u32> {
     use entropy::shannon_entropy;
     use rustc_hash::FxHashSet;
+    // Weird ahh problem, solved mostly by random propmting and looking at
+    // random metrics, then plotting it. meh
     // let (rows, cols, seconds) = (7, 11, 100); // EXAMPLE
     let (rows, cols, seconds) = (103, 101, 10000); // REAL INPUT
     let mut cache = FxHashSet::default();
@@ -119,10 +121,10 @@ pub fn part_two(input: &str) -> Option<u32> {
             .map(|rb| move_robot(*rb, 1, cols, rows))
             .collect();
 
-        let b = robots_to_byte_string(&rbs, rows, cols);
-        let ent = shannon_entropy(&b);
-        let sf = safety_factor(&rbs, rows, cols);
         if i % 10 == 0 {
+            let b = robots_to_byte_string(&rbs, rows, cols);
+            let ent = shannon_entropy(&b);
+            let sf = safety_factor(&rbs, rows, cols);
             println!("i: {}, ent: {}, sf: {}", i, ent, sf)
         }
 
