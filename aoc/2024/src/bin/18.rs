@@ -79,15 +79,15 @@ fn solve_grid(
 }
 
 pub fn part_one(input: &str) -> Option<TimeT> {
-    let (bytes, start_pos, end_pos, size) = parse(input, false);
+    let (bytes, start_pos, end_pos, size) = parse(input, true);
     let history = populate_history(&bytes);
 
-    // solve_grid(&history, start_pos, end_pos, size, 12)
-    solve_grid(&history, start_pos, end_pos, size, 1024)
+    solve_grid(&history, start_pos, end_pos, size, 12)
+    // solve_grid(&history, start_pos, end_pos, size, 1024) // real input
 }
 
 pub fn part_two(input: &str) -> Option<String> {
-    let (bytes, start_pos, end_pos, size) = parse(input, false);
+    let (bytes, start_pos, end_pos, size) = parse(input, true);
     let history = populate_history(&bytes);
 
     (0..bytes.len())
