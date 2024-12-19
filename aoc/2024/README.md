@@ -57,6 +57,6 @@ yodayodayoda, you know the deal, it's just for fun.
 | 14 |  79600140 (138.8µs @ 6560 samples) | ✖ (solved by input inspection) |
 | 15 | 55764 (469.1µs @ 2111 samples) |  9824 (796.2µs @ 1268 samples) |
 | 16 |  102504 (11.2ms @ 57 samples) | 535 (20.3ms @ 39 samples) |
-| 17 | WIP | WIP  |
+| 17 | 146164303 (1.9µs @ 10000 samples) | 265061364597659 (6.6µs @ 10000 samples)  |
 | 18 |  436 (1.4ms @ 791 samples) | 61,50 (862.3ms @ 10 samples) |
 | 19 | 355 (331.5µs @ 215 samples) | 732978410442050 (335.0µs @ 24 samples) |
