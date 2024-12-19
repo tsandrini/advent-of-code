@@ -29,6 +29,7 @@ fxhash = "0.2.1"
 good_lp = { version = "1.10.0", features = ["microlp"] }
 indicatif = "0.17.9"
 itertools = "0.13.0"
+memoize = "0.4.2"
 petgraph = "0.6.5"
 pico-args = "0.5.0"
 pipe-trait = "0.4.0"
