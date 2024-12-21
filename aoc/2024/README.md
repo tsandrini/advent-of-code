@@ -60,3 +60,4 @@ yodayodayoda, you know the deal, it's just for fun.
 | 17 | 146164303 (1.9µs @ 10000 samples) | 265061364597659 (6.6µs @ 10000 samples)  |
 | 18 |  436 (1.4ms @ 791 samples) | 61,50 (862.3ms @ 10 samples) |
 | 19 | 355 (331.5µs @ 215 samples) | 732978410442050 (335.0µs @ 24 samples) |
+| 20 | 1441 (1.6ms @ 587 samples) | 1021490 (10.8s @ 10 samples) | 
