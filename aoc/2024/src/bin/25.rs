@@ -19,41 +19,39 @@ pub fn part_one(input: &str) -> Option<u16> {
                 .lines()
                 .map(|l| l.chars().collect::<Vec<_>>())
                 .collect::<Vec<_>>();
-            let grid_t = transpose(&grid);
 
-            grid_t
+            transpose(&grid)
                 .into_iter()
                 .map(|row| row.into_iter().take_while(|c| *c == '#').count() - 1)
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
 
-    let keys = keys_s
-        .iter()
-        .map(|key| {
-            let grid = key
-                .lines()
-                .rev()
-                .map(|l| l.chars().collect::<Vec<_>>())
-                .collect::<Vec<_>>();
-            let grid_t = transpose(&grid);
+    Some(
+        keys_s
+            .iter()
+            .map(|key| {
+                let grid = key
+                    .lines()
+                    .rev()
+                    .map(|l| l.chars().collect::<Vec<_>>())
+                    .collect::<Vec<_>>();
 
-            grid_t
-                .into_iter()
-                .map(|row| row.into_iter().take_while(|c| *c == '#').count() - 1)
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
-
-    Some(locks.iter().fold(0, |acc, lock| {
-        keys.iter().fold(acc, |acc, key| {
-            acc + lock
-                .iter()
-                .zip(key.iter())
-                .map(|(l, k)| k + l)
-                .all(|n| n <= 5) as u16
-        })
-    }))
+                transpose(&grid)
+                    .into_iter()
+                    .map(|row| row.into_iter().take_while(|c| *c == '#').count() - 1)
+                    .collect::<Vec<_>>()
+            })
+            .fold(0, |outer_acc, key| {
+                locks.iter().fold(outer_acc, |acc, lock| {
+                    acc + lock
+                        .iter()
+                        .zip(key.iter())
+                        .map(|(l, k)| k + l)
+                        .all(|n| n <= 5) as u16
+                })
+            }),
+    )
 }
 
 pub fn part_two(_: &str) -> Option<u32> {
