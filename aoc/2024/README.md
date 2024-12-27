@@ -64,3 +64,5 @@ yodayodayoda, you know the deal, it's just for fun.
 | 21 | 212488 (973.8µs @ 893 samples) | 258263972600402 (984.8µs @ 645 samples) |
 | 22 | 14392541715 (6.6ms @ 149 samples) | 1628 (148.7ms @ 10 samples) |
 | 23 | 1200 (2.2ms @ 462 samples) | ag,gh,hh,iv,jx,nq,oc,qm,rb,sm,vm,wu,zr (505.1ms @ 10 samples) |
+| 24 | 46362252142374 (157.1µs @ 4340 samples) | cbd,gmh,jmq,qrh,rqf,z06,z13,z38 (2.4s @ 10 samples) |
+| 25 | 2815 (1.1ms @ 847 samples) | - |
