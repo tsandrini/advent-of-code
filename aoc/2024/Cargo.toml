@@ -20,6 +20,7 @@ today = ["chrono"]
 test_lib = []
 
 [dependencies]
+bitvec = "1.0.1"
 
 # Template dependencies
 chrono = { version = "0.4.31", optional = true }
