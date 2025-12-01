@@ -79,6 +79,7 @@ fn solve_grid(
 }
 
 pub fn part_one(input: &str) -> Option<TimeT> {
+    // NOTE on real input, change example=false and set time_limit=1024
     let (bytes, start_pos, end_pos, size) = parse(input, true);
     let history = populate_history(&bytes);
 
@@ -87,10 +88,12 @@ pub fn part_one(input: &str) -> Option<TimeT> {
 }
 
 pub fn part_two(input: &str) -> Option<String> {
+    // NOTE on real input, change example=false and set time_limit=1024
     let (bytes, start_pos, end_pos, size) = parse(input, true);
     let history = populate_history(&bytes);
+    let solution_time = solve_grid(&history, start_pos, end_pos, size, 11).unwrap() as usize;
 
-    (0..bytes.len())
+    (solution_time..bytes.len())
         .into_par_iter()
         .find_map_first(|time_limit| {
             if solve_grid(&history, start_pos, end_pos, size, time_limit as TimeT).is_none() {
