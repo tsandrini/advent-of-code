@@ -14,11 +14,16 @@ has its own root and tooling.
 For setting up reproducible tooling and developer environments I use
 [Nix](https://nixos.org/) and my personal
 [tsandrini/flake-parts-builder](https://github.com/tsandrini/flake-parts-builder/)
-template bulder which you can find in every year. This makes it fairly easy to
+template builder which you can find in every year. This makes it fairly easy to
 set up radically different tooling every year.
 
 ## Solutions
 
+- **2025**: Using Rust and a modified and nixified version of
+  the [fspoettel/advent-of-code-rust](https://github.com/fspoettel/advent-of-code-rust)
+  template, yet again. I kinda wanted to use my
+  [rust-tinynix](github.com/tsandrini/rust-tinynix) project, but I have very
+  little time unfortunately TwT >.<
 - **2024**: Using Rust and a modified and nixified version of
   the [fspoettel/advent-of-code-rust](https://github.com/fspoettel/advent-of-code-rust)
   template. I initially wanted to goof around with pure nix but I am unfortunately
