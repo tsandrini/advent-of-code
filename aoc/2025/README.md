@@ -39,6 +39,6 @@ And more.
 Note that these were ran on my poor laptop and measuring performance is hard, and
 yodayodayoda, you know the deal, it's just for fun.
 
-| Day          | Part 1         |  Part 2       |
-| :---         |     :---       | :---          |
-| 1            | todo           | todo          |
+| Day          | Part 1                      |  Part 2                       |
+| :---         |     :---                    | :---                          |
+| 1            | 962 (94.9µs @ 7490 samples) | 5782 (102.2µs @ 9938 samples) |

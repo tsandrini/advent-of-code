@@ -14,6 +14,7 @@
   openssl,
   cargo,
   rustc,
+  rustfmt,
   pkg-config,
   aoc-cli,
   cbc,
@@ -66,6 +67,7 @@ mkShell {
       openssl
       cargo
       rustc
+      rustfmt
       pkg-config
       aoc-cli
       cbc

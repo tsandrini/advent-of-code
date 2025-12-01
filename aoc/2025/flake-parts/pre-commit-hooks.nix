@@ -26,6 +26,7 @@
         editorconfig-checker.enable = true; # .editorconfig file checker
         editorconfig-checker.excludes = [
           "\\.nix$"
+          "\\.txt$"
           "\\.md$"
           "\\.envrc$"
         ];
