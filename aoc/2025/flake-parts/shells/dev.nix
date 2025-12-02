@@ -15,6 +15,7 @@
   cargo,
   rustc,
   rustfmt,
+  clippy,
   pkg-config,
   aoc-cli,
   cbc,
@@ -68,6 +69,7 @@ mkShell {
       cargo
       rustc
       rustfmt
+      clippy
       pkg-config
       aoc-cli
       cbc
