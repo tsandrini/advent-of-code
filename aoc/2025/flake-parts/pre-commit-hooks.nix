@@ -22,7 +22,7 @@
         shfmt.enable = true; # Shell parser and formatter
 
         # --- Misc ---
-        markdownlint.enable = true; # Markdown lint tool
+        # markdownlint.enable = true; # Markdown lint tool
         editorconfig-checker.enable = true; # .editorconfig file checker
         editorconfig-checker.excludes = [
           "\\.nix$"
