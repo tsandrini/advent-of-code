@@ -44,3 +44,4 @@ yodayodayoda, you know the deal, it's just for fun.
 | 1            | 962 (94.9µs @ 7490 samples) | 5782 (102.2µs @ 9938 samples) |
 | 2            | 18952700150 (2.2µs @ 10000 samples) | 28858486244 (20.8µs @ 10000 samples) |
 | 3            | 17452 (49.7µs @ 1824 samples) | 173300819005913 (55.2µs @ 8675 samples)|
+| 4            | 1502 (103.2µs @ 2055 samples) | 9083 (1.9ms @ 344 samples) |
