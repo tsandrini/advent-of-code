@@ -42,25 +42,19 @@ fn solve(input: &str, n: usize) -> ResT {
     input
         .par_lines()
         .map(|line| {
-            let l = line.len();
-            String::from_utf8(
-                line.bytes()
-                    .fold((Vec::new(), (l - n)), |(mut st, mut del), b| {
-                        while del > 0 && st.last().is_some_and(|&top| top < b) {
-                            st.pop();
-                            del -= 1;
-                        }
-                        st.push(b);
-                        (st, del)
-                    })
-                    .0
-                    .into_iter()
-                    .take(n)
-                    .collect(),
-            )
-            .unwrap()
-            .parse::<ResT>()
-            .unwrap()
+            line.bytes()
+                .fold((Vec::new(), line.len() - n), |(mut st, mut del), b| {
+                    while del > 0 && st.last().is_some_and(|&top| top < b) {
+                        st.pop();
+                        del -= 1;
+                    }
+                    st.push(b);
+                    (st, del)
+                })
+                .0
+                .into_iter()
+                .take(n)
+                .fold(0, |acc, b| 10 * acc + b.wrapping_sub(b'0') as ResT)
         })
         .sum::<ResT>()
 }
