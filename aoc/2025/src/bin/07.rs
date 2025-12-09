@@ -36,7 +36,7 @@ pub fn part_one(input: &str) -> Option<ResT> {
     init.insert(start_x);
 
     Some(
-        grid.iter()
+        grid.into_iter()
             .fold((init, 0), |(beams, ctr), row| {
                 beams
                     .into_iter()
@@ -65,7 +65,7 @@ pub fn part_two(input: &str) -> Option<ResT> {
     init.insert(start_x, 1);
 
     Some(
-        grid.iter()
+        grid.into_iter()
             .fold((init, 0), |(beams, decisions), row| {
                 beams.into_iter().fold(
                     (FxHashMap::default(), decisions),
