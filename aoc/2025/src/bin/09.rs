@@ -1,11 +1,12 @@
 advent_of_code::solution!(9);
 
 use itertools::Itertools;
-use rustc_hash::FxHashMap;
 
 type ResT = u64;
 type NumT = i64;
 type P = (NumT, NumT);
+type Edge = (P, P);
+type Rect = (P, P); // ((x1, y1), (x2, y2))
 
 fn parse(input: &str) -> Vec<P> {
     input
@@ -25,19 +26,48 @@ pub fn part_one(input: &str) -> Option<ResT> {
         parse(input)
             .into_iter()
             .combinations(2)
-            .map(|x| {
-                let ((x1, y1), (x2, y2)) = (x[0], x[1]);
-                x2.abs_diff(x1 + 1) * y2.abs_diff(y1 + 1)
-            })
+            .map(|x| (x[0], x[1]))
+            .map(|((x1, y1), (x2, y2))| x2.abs_diff(x1 + 1) * y2.abs_diff(y1 + 1))
             .max()
             .unwrap() as ResT,
     )
 }
 
+fn intersects(((rxmin, rxmax), (rymin, rymax)): Rect, edges: &[Edge]) -> bool {
+    edges.iter().any(|&((exmin, exmax), (eymin, eymax))| {
+        (rxmin < exmax && rxmax > exmin) && (rymin < eymax && rymax > eymin)
+    })
+}
+
 pub fn part_two(input: &str) -> Option<ResT> {
     let pts = parse(input);
+    let edges = pts
+        .clone()
+        .into_iter()
+        .circular_tuple_windows()
+        .map(|((x1, y1), (x2, y2))| {
+            (
+                (if x1 <= x2 { (x1, x2) } else { (x2, x1) }),
+                (if y1 <= y2 { (y1, y2) } else { (y2, y1) }),
+            )
+        })
+        .collect_vec();
 
-    None
+    Some(
+        pts.into_iter()
+            .combinations(2)
+            .map(|x| (x[0], x[1]))
+            .map(|((x1, y1), (x2, y2))| {
+                (
+                    (if x1 <= x2 { (x1, x2) } else { (x2, x1) }),
+                    (if y1 <= y2 { (y1, y2) } else { (y2, y1) }),
+                )
+            })
+            .filter(|&rect| !intersects(rect, &edges))
+            .map(|((x1, x2), (y1, y2))| (x2.abs_diff(x1) + 1) * (y2.abs_diff(y1) + 1))
+            .max()
+            .unwrap() as ResT,
+    )
 }
 
 #[cfg(test)]

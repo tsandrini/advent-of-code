@@ -49,3 +49,4 @@ yodayodayoda, you know the deal, it's just for fun.
 | 6            | 5595593539811 (94.7µs @ 9505 samples) | 10153315705125 (274.8µs @ 2557 samples) |
 | 7            | 1613 (199.4µs @ 4242 samples) | 48021610271997 (202.3µs @ 3961 samples) |
 | 8            | 24360 (22.8ms @ 36 samples) | 2185817796 (21.5ms @ 41 samples) |
+| 9            | 4756718172 (3.1ms @ 337 samples) | 1665679194 (16.8ms @ 57 samples) |
