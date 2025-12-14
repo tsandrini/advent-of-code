@@ -1,11 +1,9 @@
 advent_of_code::solution!(10);
 
-use rayon::prelude::*;
-
 use good_lp::solvers::microlp::microlp;
 use good_lp::{Expression, Solution, SolverModel, constraint, variables};
-
 use itertools::Itertools;
+use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
 
@@ -64,7 +62,6 @@ pub fn part_one(input: &str) -> Option<ResT> {
     Some(
         parse(input)
             .map(|(lights_target, btns, _)| {
-                let mut least_presses = 0;
                 let mut seen = FxHashSet::default();
                 let mut q = VecDeque::new();
 
@@ -73,8 +70,7 @@ pub fn part_one(input: &str) -> Option<ResT> {
 
                 while let Some((curr_lights, presses)) = q.pop_front() {
                     if curr_lights == lights_target {
-                        least_presses = presses;
-                        break;
+                        return presses;
                     }
 
                     btns.iter().for_each(|btn| {
@@ -85,7 +81,7 @@ pub fn part_one(input: &str) -> Option<ResT> {
                     });
                 }
 
-                least_presses
+                0
             })
             .sum::<ResT>(),
     )
