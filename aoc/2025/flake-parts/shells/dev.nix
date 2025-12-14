@@ -25,6 +25,7 @@
   # irust,
   python3,
   evcxr,
+  highs,
 }:
 let
   scripts = {
@@ -68,6 +69,7 @@ mkShell {
       openssl
       cargo
       rustc
+      highs
       rustfmt
       clippy
       pkg-config

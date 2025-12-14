@@ -50,3 +50,4 @@ yodayodayoda, you know the deal, it's just for fun.
 | 7            | 1613 (199.4µs @ 4242 samples) | 48021610271997 (202.3µs @ 3961 samples) |
 | 8            | 24360 (22.8ms @ 36 samples) | 2185817796 (21.5ms @ 41 samples) |
 | 9            | 4756718172 (3.1ms @ 337 samples) | 1665679194 (16.8ms @ 57 samples) |
+| 10           | 535 (382.7µs @ 1026 samples)     | 21021 (6.1ms @ 119 samples) |
